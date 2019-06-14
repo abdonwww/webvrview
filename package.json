@@ -1,0 +1,43 @@
+{
+  "name": "webvrview",
+  "version": "1.0.0",
+  "description": "Embed VR content into your webpage.",
+  "main": "index.js",
+  "scripts": {
+    "start": "npm-run-all -p watch:*",
+    "watch:server": "webpack-dev-server",
+    "watch:webpack": "webpack --watch --config ./webpack.config.js --colors --display-error-details",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/google/vrview.git"
+  },
+  "keywords": [
+    "vr"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/google/vrview/issues"
+  },
+  "homepage": "https://github.com/google/vrview#readme",
+  "devDependencies": {
+    "awesome-typescript-loader": "^5.2.1",
+    "npm-run-all": "^4.1.5",
+    "source-map-loader": "^0.2.4",
+    "typescript": "^3.5.2",
+    "webpack": "^4.34.0",
+    "webpack-cli": "^3.3.4",
+    "webpack-dev-server": "^3.7.1"
+  },
+  "dependencies": {
+    "@tweenjs/tween.js": "^17.4.0",
+    "eventemitter3": "^3.1.2",
+    "lodash": "^4.17.11",
+    "shaka-player": "^2.5.2",
+    "three": "^0.105.2",
+    "urijs": "^1.19.1",
+    "webvr-boilerplate": "^0.5.0"
+  }
+}
