@@ -1,6 +1,6 @@
 import { EventEmitter } from 'eventemitter3';
 import * as THREE from 'three';
-import TWEEN from '@tweenjs/tween.js';
+import * as TWEEN from '@tweenjs/tween.js';
 import Util from '../util';
 
 /**
@@ -201,7 +201,7 @@ export default class HotspotRenderer extends EventEmitter {
     this.hotspotRoot.visible = isVisible;
   }
 
-  onTouchStart_(e) {
+  onTouchStart_(e: TouchEvent) {
     // In VR mode, don't touch the pointer position.
     if (!this.worldRenderer.isVRMode()) {
       this.updateTouch_(e);
@@ -218,7 +218,7 @@ export default class HotspotRenderer extends EventEmitter {
     return false;
   }
 
-  onTouchEnd_(e) {
+  onTouchEnd_(e: TouchEvent) {
     // If no hotspots are pressed, emit an empty click event.
     if (Util.isEmptyObject(this.downHotspots)) {
       this.emit('click');
@@ -233,14 +233,14 @@ export default class HotspotRenderer extends EventEmitter {
     }
   }
 
-  updateTouch_(e) {
+  updateTouch_(e: TouchEvent) {
     var size = this.getSize_();
     var touch = e.touches[0];
     this.pointer.x = (touch.clientX / size.width) * 2 - 1;
     this.pointer.y = - (touch.clientY / size.height) * 2 + 1;
   }
 
-  onMouseDown_ (e) {
+  onMouseDown_ (e: MouseEvent) {
     this.updateMouse_(e);
   
     this.downHotspots = {};
@@ -250,11 +250,11 @@ export default class HotspotRenderer extends EventEmitter {
     }
   }
 
-  onMouseMove_(e) {
+  onMouseMove_(e: MouseEvent) {
     this.updateMouse_(e);
   }
 
-  onMouseUp_(e) {
+  onMouseUp_(e: MouseEvent) {
     this.updateMouse_(e);
   
     // If no hotspots are pressed, emit an empty click event.
@@ -272,7 +272,7 @@ export default class HotspotRenderer extends EventEmitter {
     }
   }
 
-  updateMouse_(e) {
+  updateMouse_(e: MouseEvent) {
     const size = this.getSize_();
     this.pointer.x = (e.clientX / size.width) * 2 - 1;
     this.pointer.y = - (e.clientY / size.height) * 2 + 1;

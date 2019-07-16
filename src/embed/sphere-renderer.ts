@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import TWEEN from '@tweenjs/tween.js';
+import * as TWEEN from '@tweenjs/tween.js';
 import Eyes from './eyes';
 import VideoType from './video-type';
 import Util from '../util';
