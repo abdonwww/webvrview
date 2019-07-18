@@ -3,7 +3,7 @@ export default class Analytics {
   lastModeLabel: string;
   lastMode: number;
 
-  MODE_LABELS = {
+  MODE_LABELS = <any>{
     0: 'UNKNOWN',
     1: 'NORMAL',
     2: 'MAGIC_WINDOW',
@@ -16,8 +16,8 @@ export default class Analytics {
         m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
     })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-    ga('create', 'UA-35315454-8', 'auto');
-    ga('send', 'pageview');
+    window.ga('create', 'UA-35315454-8', 'auto');
+    window.ga('send', 'pageview');
 
     this.lastModeChangeTime = window.performance.now();
     this.lastModeLabel = this.MODE_LABELS[0];
@@ -29,14 +29,14 @@ export default class Analytics {
   
     console.log('Analytics: going from mode %s to %s', lastModeLabel, modeLabel);
   
-    ga('send', 'screenview', {
+    window.ga('send', 'screenview', {
       appName: 'EmbedVR',
       screenName: modeLabel
     });
   
     var now = window.performance.now();
     var msSinceLastModeChange = Math.round(now - this.lastModeChangeTime);
-    ga('send', 'timing', 'Time spent in mode', lastModeLabel, msSinceLastModeChange);
+    window.ga('send', 'timing', 'Time spent in mode', lastModeLabel, msSinceLastModeChange);
   
     this.lastModeChangeTime = now;
     this.lastMode = mode;

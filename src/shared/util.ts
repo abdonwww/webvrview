@@ -179,7 +179,7 @@ export default class Util {
     return out;
   }
   
-  static sendParentMessage(message: string) {
+  static sendParentMessage(message: Object) {
     if (window.parent) {
       parent.postMessage(message, '*');
     }

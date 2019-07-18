@@ -28,13 +28,13 @@ export default class SphereRenderer {
       this.resolve = resolve;
       this.reject = reject;
   
-      var params = opt_params || {};
+      const params = opt_params || {};
   
       this.isStereo = !!params.isStereo;
       this.src = src;
   
       // Load texture.
-      var loader = new THREE.TextureLoader();
+      const loader = new THREE.TextureLoader();
       loader.crossOrigin = 'anonymous';
       loader.load(src, this.onTextureLoaded_.bind(this), undefined, this.onTextureError_.bind(this));
     });
@@ -86,7 +86,7 @@ export default class SphereRenderer {
     const scene = this.scene;
     // If we want the opacity
     const overlayOpacity = 1 - opacity;
-    return new Promise((resolve: Function) => {
+    return new Promise((resolve: any) => {
       const mask = scene.getObjectByName('opacityMask');
       const tween = new TWEEN.Tween({ opacity: mask.material.opacity })
           .to({ opacity: overlayOpacity }, duration)
@@ -99,8 +99,8 @@ export default class SphereRenderer {
   }
 
   onTextureLoaded_(texture: any) {
-    var sphereLeft;
-    var sphereRight;
+    let sphereLeft;
+    let sphereRight;
     if (this.isStereo) {
       sphereLeft = this.createPhotosphere_(texture, {offsetY: 0.5, scaleY: 0.5});
       sphereRight = this.createPhotosphere_(texture, {offsetY: 0, scaleY: 0.5});
@@ -111,10 +111,10 @@ export default class SphereRenderer {
   
     // Display in left and right eye respectively.
     sphereLeft.layers.set(EYE.LEFT);
-    sphereLeft.eye = EYE.LEFT;
+    // sphereLeft.eye = EYE.LEFT;
     sphereLeft.name = 'eyeLeft';
     sphereRight.layers.set(EYE.RIGHT);
-    sphereRight.eye = EYE.RIGHT;
+    // sphereRight.eye = EYE.RIGHT;
     sphereRight.name = 'eyeRight';
   
     this.scene.getObjectByName('photo').children = [sphereLeft, sphereRight];
@@ -172,7 +172,7 @@ export default class SphereRenderer {
     } else {
       material = new THREE.MeshBasicMaterial({ map: texture });
     }
-    var out = new THREE.Mesh(geometry, material);
+    const out = new THREE.Mesh(geometry, material);
     //out.visible = false;
     out.renderOrder = -1;
     return out;
