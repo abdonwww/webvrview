@@ -1,14 +1,14 @@
 import { EventEmitter } from 'eventemitter3';
 import * as THREE from 'three';
-import * as TWEEN from '@tweenjs/tween.js';
+import TWEEN from '@tweenjs/tween.js';
 import AdaptivePlayer from './adaptive-player';
-import HotspotRenderer from './hotspot-renderer';
+// import HotspotRenderer from './hotspot-renderer';
 import ReticleRenderer from './reticle-renderer';
 import SphereRenderer from './sphere-renderer';
 import VideoProxy from './video-proxy';
 import Util from "../shared/util";
 
-const WebVRManager = require('webvr-boilerplate');
+// const WebVRManager = require('webvr-boilerplate');
 
 /**
  * The main WebGL rendering entry point. Manages the scene, camera, VR-related
@@ -35,18 +35,18 @@ const AUTOPAN_ANGLE = 0.4;
 
 export default class WorldRenderer extends EventEmitter {
   sphereRenderer: SphereRenderer;
-  hotspotRenderer: HotspotRenderer;
+  // hotspotRenderer: HotspotRenderer;
   reticleRenderer: ReticleRenderer;
   videoProxy: VideoProxy;
   vrDisplay: any;
-  controls: any;
-  effect: any;
+  // controls: any;
+  // effect: any;
   camera: any;
   scene: any;
   sceneInfo: any;
   player: any;
   renderer: any;
-  manager: any;
+  // manager: any;
   sceneResolve: any;
   sceneReject: any;
 
@@ -55,9 +55,9 @@ export default class WorldRenderer extends EventEmitter {
     this.init_(params.hideFullscreenButton);
 
     this.sphereRenderer = new SphereRenderer(this.scene);
-    this.hotspotRenderer = new HotspotRenderer(this);
-    this.hotspotRenderer.on('focus', this.onHotspotFocus_.bind(this));
-    this.hotspotRenderer.on('blur', this.onHotspotBlur_.bind(this));
+    // this.hotspotRenderer = new HotspotRenderer(this);
+    // this.hotspotRenderer.on('focus', this.onHotspotFocus_.bind(this));
+    // this.hotspotRenderer.on('blur', this.onHotspotBlur_.bind(this));
     this.reticleRenderer = new ReticleRenderer(this.camera);
 
     // Get the VR Display as soon as we initialize.
@@ -69,20 +69,19 @@ export default class WorldRenderer extends EventEmitter {
   }
   
   render(time: number) {
-    this.controls.update();
+    // this.controls.update();
     TWEEN.update(time);
-    this.effect.render(this.scene, this.camera);
-    this.hotspotRenderer.update(this.camera);
+    // this.effect.render(this.scene, this.camera);
+    // this.hotspotRenderer.update(this.camera);
   }
 
   /**
    * @return {Promise} When the scene is fully loaded.
    */
   setScene(scene: any) {
-    var self = this;
-    var promise = new Promise(function(resolve, reject) {
-      self.sceneResolve = resolve;
-      self.sceneReject = reject;
+    const promise = new Promise((resolve, reject) => {
+      this.sceneResolve = resolve;
+      this.sceneReject = reject;
     });
   
     if (!scene || !scene.isValid()) {
@@ -99,64 +98,61 @@ export default class WorldRenderer extends EventEmitter {
   
     this.setDefaultYaw_(scene.defaultYaw || 0);
   
-    // Disable VR mode if explicitly disabled, or if we're loading a video on iOS
-    // 9 or earlier.
-    if (scene.isVROff || (scene.video && Util.isIOS9OrLess())) {
-      this.manager.setVRCompatibleOverride(false);
-    }
+    // Disable VR mode if explicitly disabled, or if we're loading a video on iOS 9 or earlier.
+    // if (scene.isVROff || (scene.video && Util.isIOS9OrLess())) {
+    //   this.manager.setVRCompatibleOverride(false);
+    // }
   
     // Set various callback overrides in iOS.
-    if (Util.isIOS()) {
-      this.manager.setFullscreenCallback(() => {
-        Util.sendParentMessage({ type: 'enter-fullscreen' });
-      });
-      this.manager.setExitFullscreenCallback(() => {
-        Util.sendParentMessage({ type: 'exit-fullscreen' });
-      });
-      this.manager.setVRCallback(() => {
-        Util.sendParentMessage({ type: 'enter-vr' });
-      });
-    }
+    // if (Util.isIOS()) {
+    //   this.manager.setFullscreenCallback(() => {
+    //     Util.sendParentMessage({ type: 'enter-fullscreen' });
+    //   });
+    //   this.manager.setExitFullscreenCallback(() => {
+    //     Util.sendParentMessage({ type: 'exit-fullscreen' });
+    //   });
+    //   this.manager.setVRCallback(() => {
+    //     Util.sendParentMessage({ type: 'enter-vr' });
+    //   });
+    // }
   
     // If we're dealing with an image, and not a video.
     if (scene.image && !scene.video) {
       if (scene.preview) {
         // First load the preview.
-        this.sphereRenderer.setPhotosphere(scene.preview, params).then(function() {
-          // As soon as something is loaded, emit the load event to hide the
-          // loading progress bar.
-          self.didLoad_();
+        this.sphereRenderer.setPhotosphere(scene.preview, params).then(() => {
+          // As soon as something is loaded, emit the load event to hide the loading progress bar.
+          this.didLoad_();
           // Then load the full resolution image.
-          self.sphereRenderer.setPhotosphere(scene.image, params);
-        }).catch(self.didLoadFail_.bind(self));
+          this.sphereRenderer.setPhotosphere(scene.image, params);
+        }).catch(this.didLoadFail_.bind(this));
       } else {
         // No preview -- go straight to rendering the full image.
-        this.sphereRenderer.setPhotosphere(scene.image, params).then(function() {
-          self.didLoad_();
-        }).catch(self.didLoadFail_.bind(self));
+        this.sphereRenderer.setPhotosphere(scene.image, params).then(() => {
+          this.didLoad_();
+        }).catch(this.didLoadFail_.bind(this));
       }
     } else if (scene.video) {
       if (Util.isIE11()) {
-        // On IE 11, if an 'image' param is provided, load it instead of showing
-        // an error.
+        // On IE 11, if an 'image' param is provided, load it instead of showing an error.
         //
         // TODO(smus): Once video textures are supported, remove this fallback.
         if (scene.image) {
-          this.sphereRenderer.setPhotosphere(scene.image, params).then(function() {
-            self.didLoad_();
-          }).catch(self.didLoadFail_.bind(self));
+          this.sphereRenderer.setPhotosphere(scene.image, params).then(() => {
+            this.didLoad_();
+          }).catch(this.didLoadFail_.bind(this));
         } else {
           this.didLoadFail_('Video is not supported on IE11.');
         }
       } else {
         this.player = new AdaptivePlayer(params);
-        this.player.on('load', function(videoElement: any, videoType: number) {
-          self.sphereRenderer.set360Video(videoElement, videoType, params).then(function() {
-            self.didLoad_({videoElement: videoElement});
-          }).catch(self.didLoadFail_.bind(self));
+        this.player.on('load', (videoElement: any, videoType: number) => {
+          this.sphereRenderer.set360Video(videoElement, videoType, params).then(() => {
+            this.didLoad_({ videoElement: videoElement });
+          }).catch(this.didLoadFail_.bind(this));
         });
-        this.player.on('error', function(error: any) {
-          self.didLoadFail_('Video load error: ' + error);
+        this.player.on('error', (error: any) => {
+          this.didLoadFail_('Video load error: ' + error);
         });
         this.player.load(scene.video);
   
@@ -243,14 +239,18 @@ export default class WorldRenderer extends EventEmitter {
   setDefaultYaw_(angleRad: number) {
     // Rotate the camera parent to take into account the scene's rotation.
     // By default, it should be at the center of the image.
-    var display = this.controls.getVRDisplay();
+    // const display = this.controls.getVRDisplay();
+
     // For desktop, we subtract the current display Y axis
-    var theta = display.theta_ || 0;
+    // const theta = display.theta_ || 0;
+
     // For devices with orientation we make the current view center
-    if (display.poseSensor_) {
-      display.poseSensor_.resetPose();
-    }
-    this.camera.parent.rotation.y = (Math.PI / 2.0) + angleRad - theta;
+    // if (display.poseSensor_) {
+    //   display.poseSensor_.resetPose();
+    // }
+
+    // this.camera.parent.rotation.y = (Math.PI / 2.0) + angleRad - theta;
+    // this.camera.parent.rotation.y = (Math.PI / 2.0) + angleRad;
   }
 
   /**
@@ -267,16 +267,16 @@ export default class WorldRenderer extends EventEmitter {
   }
 
   init_(hideFullscreenButton: boolean) {
-    var container = document.querySelector('body');
-    var aspect = window.innerWidth / window.innerHeight;
-    var camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 100);
+    const container = document.querySelector('body');
+    const aspect = window.innerWidth / window.innerHeight;
+    const camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 100);
     camera.layers.enable(1);
   
-    var cameraDummy = new THREE.Object3D();
+    const cameraDummy = new THREE.Object3D();
     cameraDummy.add(camera);
   
     // Antialiasing disabled to improve performance.
-    var renderer = new THREE.WebGLRenderer({
+    const renderer = new THREE.WebGLRenderer({
       antialias: false,
     });
     renderer.vr.enabled = true;
@@ -286,38 +286,35 @@ export default class WorldRenderer extends EventEmitter {
   
     container.appendChild(renderer.domElement);
   
-    const controls = new THREE.VRControls(camera);
-    const effect = new THREE.VREffect(renderer);
+    // const controls = new THREE.VRControls(camera);
+    // const effect = new THREE.VREffect(renderer);
   
     // Disable eye separation.
-    effect.scale = 0;
-    effect.setSize(window.innerWidth, window.innerHeight);
+    // effect.scale = 0;
+    // effect.setSize(window.innerWidth, window.innerHeight);
   
     // Present submission of frames automatically. This is done manually in submitFrame().
-    effect.autoSubmitFrame = false;
+    // effect.autoSubmitFrame = false;
   
     this.camera = camera;
     this.renderer = renderer;
-    this.effect = effect;
-    this.controls = controls;
-    this.manager = new WebVRManager(renderer, effect, { predistorted: false, hideButton: hideFullscreenButton });
+    // this.effect = effect;
+    // this.controls = controls;
+    // this.manager = new WebVRManager(renderer, effect, { predistorted: false, hideButton: hideFullscreenButton });
   
     this.scene = this.createScene_();
     this.scene.add(this.camera.parent);
-  
   
     // Watch the resize event.
     window.addEventListener('resize', this.onResize_.bind(this));
   
     // Prevent context menu.
-    window.addEventListener('contextmenu', this.onContextMenu_.bind(this));
-  
-    window.addEventListener('vrdisplaypresentchange',
-                            this.onVRDisplayPresentChange_.bind(this));
+    // window.addEventListener('contextmenu', this.onContextMenu_.bind(this));
+    window.addEventListener('vrdisplaypresentchange', this.onVRDisplayPresentChange_.bind(this));
   }
 
   onResize_() {
-    this.effect.setSize(window.innerWidth, window.innerHeight);
+    // this.effect.setSize(window.innerWidth, window.innerHeight);
     this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
   }
@@ -327,10 +324,11 @@ export default class WorldRenderer extends EventEmitter {
     if (Util.isDebug()) {
       console.log('onVRDisplayPresentChange_');
     }
-    var isVR = this.isVRMode();
+    const isVR = this.isVRMode();
   
     // If the mode changed to VR and there is at least one hotspot, show reticle.
-    var isReticleVisible = isVR && this.hotspotRenderer.getCount() > 0;
+    const isReticleVisible = isVR;
+    // const isReticleVisible = isVR && this.hotspotRenderer.getCount() > 0;
     this.reticleRenderer.setVisibility(isReticleVisible);
   
     // Resize the renderer for good measure.

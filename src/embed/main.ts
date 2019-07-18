@@ -1,5 +1,5 @@
 // import WebVRPolyfill from "webvr-polyfill";
-import "webvr-polyfill";
+import WebVRPolyfill from 'webvr-polyfill';
 import Stats from "stats.js";
 import LoadingIndicator from "./loading-indicator";
 import WorldRenderer from "./world-renderer";
@@ -8,6 +8,7 @@ import SceneInfo from "./scene-info";
 import { MESSAGE } from "../shared/constants";
 import Util from "../shared/util";
 
+new WebVRPolyfill();
 const loadIndicator = new LoadingIndicator();
 
 // const receiver = new IFrameMessageReceiver();
@@ -21,57 +22,64 @@ const loadIndicator = new LoadingIndicator();
 // receiver.on(MESSAGE.GET_POSITION, onGetPosition);
 // receiver.on(MESSAGE.SET_FULLSCREEN, onSetFullscreen);
 
-window.addEventListener('load', onLoad);
-
 const stats = new Stats();
 const scene = SceneInfo.loadFromGetParams();
-
 const worldRenderer = new WorldRenderer(scene);
 worldRenderer.on('error', onRenderError);
 worldRenderer.on('load', onRenderLoad);
 worldRenderer.on('modechange', onModeChange);
 worldRenderer.on('ended', onEnded);
 worldRenderer.on('play', onPlay);
-worldRenderer.hotspotRenderer.on('click', onHotspotClick);
+// worldRenderer.hotspotRenderer.on('click', onHotspotClick);
 
 let isReadySent = false;
+window.addEventListener('load', onLoad);
 
 function onLoad() {
   if (!Util.isWebGLEnabled()) {
     showError('WebGL not supported.');
     return;
   }
-
   // Load the scene.
   worldRenderer.setScene(scene);
-
   if (scene.isDebug) {
     // Show stats.
     showStats();
   }
-
   if (scene.isYawOnly) {
     const WebVRConfig = window.WebVRConfig || {};
     WebVRConfig.YAW_ONLY = true;
   }
-
   requestAnimationFrame(loop);
 }
 
+function loop(time: number) {
+  // Use the VRDisplay RAF if it is present.
+  if (worldRenderer.vrDisplay) {
+    worldRenderer.vrDisplay.requestAnimationFrame(loop);
+  } else {
+    requestAnimationFrame(loop);
+  }
+  stats.begin();
+  // Update the video if needed.
+  if (worldRenderer.videoProxy) {
+    worldRenderer.videoProxy.update();
+  }
+  worldRenderer.render(time);
+  worldRenderer.submitFrame();
+  stats.end();
+}
 
 function onVideoTap() {
   worldRenderer.videoProxy.play();
   hidePlayButton();
-
   // Prevent multiple play() calls on the video element.
   document.body.removeEventListener('touchend', onVideoTap);
 }
 
 function onRenderLoad(event: any) {
   if (event.videoElement) {
-
-    var scene = SceneInfo.loadFromGetParams();
-
+    // const scene = SceneInfo.loadFromGetParams();
     // On mobile, tell the user they need to tap to start. Otherwise, autoplay.
     if (Util.isMobile()) {
       // Tell user to tap to start.
@@ -80,7 +88,7 @@ function onRenderLoad(event: any) {
     } else {
       event.videoElement.play();
     }
-
+    
     // Attach to pause and play events, to notify the API.
     event.videoElement.addEventListener('pause', onPause);
     event.videoElement.addEventListener('play', onPlay);
@@ -89,12 +97,10 @@ function onRenderLoad(event: any) {
   }
   // Hide loading indicator.
   loadIndicator.hide();
-
   // Autopan only on desktop, for photos only, and only if autopan is enabled.
   if (!Util.isMobile() && !worldRenderer.sceneInfo.video && !worldRenderer.sceneInfo.isAutopanOff) {
     worldRenderer.autopan();
   }
-
   // Notify the API that we are ready, but only do this once.
   if (!isReadySent) {
     if (event.videoElement) {
@@ -109,11 +115,9 @@ function onRenderLoad(event: any) {
         type: 'ready'
       });
     }
-
     isReadySent = true;
   }
 }
-
 /**
  * IFrameMessageReceiver
  */
@@ -124,7 +128,6 @@ function onRenderLoad(event: any) {
 //   }
 //   worldRenderer.videoProxy.play();
 // }
-
 // function onPauseRequest() {
 //   if (!worldRenderer.videoProxy) {
 //     onApiError('Attempt to pause, but no video found.');
@@ -132,13 +135,11 @@ function onRenderLoad(event: any) {
 //   }
 //   worldRenderer.videoProxy.pause();
 // }
-
 // function onAddHotspot(e: any) {
 //   if (Util.isDebug()) {
 //     console.log('onAddHotspot', e);
 //   }
 //   // TODO: Implement some validation?
-
 //   var pitch = parseFloat(e.pitch);
 //   var yaw = parseFloat(e.yaw);
 //   var radius = parseFloat(e.radius);
@@ -146,7 +147,6 @@ function onRenderLoad(event: any) {
 //   var id = e.id;
 //   worldRenderer.hotspotRenderer.add(pitch, yaw, radius, distance, id);
 // }
-
 // function onSetContent(e: any) {
 //   if (Util.isDebug()) {
 //     console.log('onSetContent', e);
@@ -158,13 +158,11 @@ function onRenderLoad(event: any) {
 //     // Then load the new scene.
 //     var scene = SceneInfo.loadFromAPIParams(e.contentInfo);
 //     worldRenderer.destroy();
-
 //     // Update the URL to reflect the new scene. This is important particularily
 //     // on iOS where we use a fake fullscreen mode.
 //     var url = scene.getCurrentUrl();
 //     //console.log('Updating url to be %s', url);
 //     window.history.pushState(null, 'VR View', url);
-
 //     // And set the new scene.
 //     return worldRenderer.setScene(scene);
 //   }).then(function() {
@@ -172,14 +170,12 @@ function onRenderLoad(event: any) {
 //     worldRenderer.sphereRenderer.setOpacity(1, 500);
 //   });
 // }
-
 // function onSetVolume(e: any) {
 //   // Only work for video. If there's no video, send back an error.
 //   if (!worldRenderer.videoProxy) {
 //     onApiError('Attempt to set volume, but no video found.');
 //     return;
 //   }
-
 //   worldRenderer.videoProxy.setVolume(e.volumeLevel);
 // //   volume = e.volumeLevel;
 //   Util.sendParentMessage({
@@ -187,32 +183,26 @@ function onRenderLoad(event: any) {
 //     data: e.volumeLevel
 //   });
 // }
-
 // function onMuted(e: any) {
 //   // Only work for video. If there's no video, send back an error.
 //   if (!worldRenderer.videoProxy) {
 //     onApiError('Attempt to mute, but no video found.');
 //     return;
 //   }
-
 //   worldRenderer.videoProxy.mute(e.muteState);
-
 //   Util.sendParentMessage({
 //     type: 'muted',
 //     data: e.muteState
 //   });
 // }
-
 // function onUpdateCurrentTime(time: number) {
 //   if (!worldRenderer.videoProxy) {
 //     onApiError('Attempt to pause, but no video found.');
 //     return;
 //   }
-
 //   worldRenderer.videoProxy.setCurrentTime(time);
 //   onGetCurrentTime();
 // }
-
 // function onGetPosition() {
 //     Util.sendParentMessage({
 //         type: 'getposition',
@@ -222,7 +212,6 @@ function onRenderLoad(event: any) {
 //         }
 //     });
 // }
-
 // function onSetFullscreen() {
 //   if (!worldRenderer.videoProxy) {
 //     onApiError('Attempt to set fullscreen, but no video found.');
@@ -230,9 +219,6 @@ function onRenderLoad(event: any) {
 //   }
 //   worldRenderer.manager.onFSClick_();
 // }
-
-
-
 /**
  * WorldRenderer
  */
@@ -248,24 +234,26 @@ function onApiError(message: string) {
   console.error(message);
   Util.sendParentMessage({
     type: 'error',
-    data: { message: message }
+    data: {
+      message: message
+    }
   });
 }
 
 function onModeChange(mode: Object) {
   Util.sendParentMessage({
     type: 'modechange',
-    data: { mode: mode }
+    data: {
+      mode: mode
+    }
   });
 }
-
-function onHotspotClick(id: string) {
-  Util.sendParentMessage({
-    type: 'click',
-    data: { id: id }
-  });
-}
-
+// function onHotspotClick(id: string) {
+//   Util.sendParentMessage({
+//     type: 'click',
+//     data: { id: id }
+//   });
+// }
 function onPlay() {
   Util.sendParentMessage({
     type: 'paused',
@@ -281,10 +269,10 @@ function onPause() {
 }
 
 function onEnded() {
-    Util.sendParentMessage({
-      type: 'ended',
-      data: true
-    });
+  Util.sendParentMessage({
+    type: 'ended',
+    data: true
+  });
 }
 
 function onSceneError(message: string) {
@@ -298,16 +286,13 @@ function onRenderError(message: string) {
 function showError(message: string) {
   // Hide loading indicator.
   loadIndicator.hide();
-
   // Sanitize `message` as it could contain user supplied
   // values. Re-add the space character as to not modify the
   // error messages used throughout the codebase.
   message = encodeURI(message).replace(/%20/g, ' ');
-
   var error = document.querySelector('#error');
   error.classList.add('visible');
   error.querySelector('.message').innerHTML = message;
-
   error.querySelector('.title').innerHTML = 'Error';
 }
 
@@ -328,28 +313,9 @@ function hidePlayButton() {
 
 function showStats() {
   stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
-
   // Align bottom-left.
   stats.dom.style.position = 'absolute';
   stats.dom.style.left = '0px';
   stats.dom.style.bottom = '0px';
   document.body.appendChild(stats.dom);
-}
-
-function loop(time: number) {
-  // Use the VRDisplay RAF if it is present.
-  if (worldRenderer.vrDisplay) {
-    worldRenderer.vrDisplay.requestAnimationFrame(loop);
-  } else {
-    requestAnimationFrame(loop);
-  }
-
-  stats.begin();
-  // Update the video if needed.
-  if (worldRenderer.videoProxy) {
-    worldRenderer.videoProxy.update();
-  }
-  worldRenderer.render(time);
-  worldRenderer.submitFrame();
-  stats.end();
 }

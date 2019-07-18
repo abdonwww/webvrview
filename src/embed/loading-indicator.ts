@@ -22,7 +22,7 @@ export default class LoadingIndicator {
     overlayStyle.background = '#eee';
 
     const img = document.createElement('img');
-    img.src = 'images/loading.gif';
+    img.src = 'assets/images/loading.gif';
 
     const imgStyle: CSSStyleDeclaration = img.style;
     imgStyle.position = 'absolute';

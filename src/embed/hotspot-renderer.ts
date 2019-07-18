@@ -1,6 +1,6 @@
 import { EventEmitter } from 'eventemitter3';
 import * as THREE from 'three';
-import * as TWEEN from '@tweenjs/tween.js';
+import TWEEN from '@tweenjs/tween.js';
 import Util from "../shared/util";
 
 /**

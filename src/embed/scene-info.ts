@@ -1,21 +1,21 @@
 import * as THREE from 'three';
 import Util from "../shared/util";
 
-const CAMEL_TO_UNDERSCORE = <any>{
-  video: 'video',
-  image: 'image',
-  preview: 'preview',
-  loop: 'loop',
-  volume: 'volume',
-  muted: 'muted',
-  isStereo: 'is_stereo',
-  isYawOnly: 'is_yaw_only',
-  isDebug: 'is_debug',
-  isVROff: 'is_vr_off',
-  isAutopanOff: 'is_autopan_off',
-  defaultYaw: 'default_yaw',
-  hideFullscreenButton: 'hide_fullscreen_button'
-};
+// const CAMEL_TO_UNDERSCORE = <any>{
+//   video: 'video',
+//   image: 'image',
+//   preview: 'preview',
+//   loop: 'loop',
+//   volume: 'volume',
+//   muted: 'muted',
+//   isStereo: 'is_stereo',
+//   isYawOnly: 'is_yaw_only',
+//   isDebug: 'is_debug',
+//   isVROff: 'is_vr_off',
+//   isAutopanOff: 'is_autopan_off',
+//   defaultYaw: 'default_yaw',
+//   hideFullscreenButton: 'hide_fullscreen_button'
+// };
 
 /**
  * Contains all information about a given scene.
@@ -35,6 +35,22 @@ export default class SceneInfo {
   defaultYaw: number;
   hideFullscreenButton: boolean;
   errorMessage: string;
+
+  static CAMEL_TO_UNDERSCORE = <any>{
+    video: 'video',
+    image: 'image',
+    preview: 'preview',
+    loop: 'loop',
+    volume: 'volume',
+    muted: 'muted',
+    isStereo: 'is_stereo',
+    isYawOnly: 'is_yaw_only',
+    isDebug: 'is_debug',
+    isVROff: 'is_vr_off',
+    isAutopanOff: 'is_autopan_off',
+    defaultYaw: 'default_yaw',
+    hideFullscreenButton: 'hide_fullscreen_button'
+  };
 
   constructor(opt_params: any) {
     const params = opt_params || {};
@@ -62,8 +78,8 @@ export default class SceneInfo {
   static loadFromGetParams() {
     const params = <any>{};
 
-    Object.keys(CAMEL_TO_UNDERSCORE).forEach((camelCase: any) => {
-      const underscore = CAMEL_TO_UNDERSCORE[camelCase];
+    Object.keys(SceneInfo.CAMEL_TO_UNDERSCORE).forEach((camelCase: any) => {
+      const underscore = SceneInfo.CAMEL_TO_UNDERSCORE[camelCase];
       params[camelCase] = Util.getQueryParameter(underscore) || ((window.WebVRConfig && window.WebVRConfig.PLAYER) ? window.WebVRConfig.PLAYER[underscore] : "");
     });
 
@@ -76,14 +92,13 @@ export default class SceneInfo {
 
   static loadFromAPIParams(underscoreParams: any) {
     const params = <any>{};
-
-    for (var camelCase in CAMEL_TO_UNDERSCORE) {
-      const underscore = CAMEL_TO_UNDERSCORE[camelCase];
-
+    
+    Object.keys(SceneInfo.CAMEL_TO_UNDERSCORE).forEach((camelCase: any) => {
+      const underscore = SceneInfo.CAMEL_TO_UNDERSCORE[camelCase];
       if (underscoreParams[underscore]) {
         params[camelCase] = underscoreParams[underscore];
       }
-    }
+    });
 
     const scene = new SceneInfo(params);
     if (!scene.isValid()) {
@@ -112,8 +127,8 @@ export default class SceneInfo {
   getCurrentUrl() {
     let url = location.protocol + '//' + location.host + location.pathname + '?';
 
-    Object.keys(CAMEL_TO_UNDERSCORE).forEach((camelCase: any) => {
-      const underscore = CAMEL_TO_UNDERSCORE[camelCase];
+    Object.keys(SceneInfo.CAMEL_TO_UNDERSCORE).forEach((camelCase: any) => {
+      const underscore = SceneInfo.CAMEL_TO_UNDERSCORE[camelCase];
       // const value = this[camelCase];
       const value = '';
 
