@@ -52,12 +52,12 @@ export default class WorldRenderer extends EventEmitter {
 
   constructor(params: Params) {
     super();
-    this.init_(params.hideFullscreenButton);
+    this.init(params.hideFullscreenButton);
 
     this.sphereRenderer = new SphereRenderer(this.scene);
     // this.hotspotRenderer = new HotspotRenderer(this);
-    // this.hotspotRenderer.on('focus', this.onHotspotFocus_.bind(this));
-    // this.hotspotRenderer.on('blur', this.onHotspotBlur_.bind(this));
+    // this.hotspotRenderer.on('focus', this.onHotspotFocus.bind(this));
+    // this.hotspotRenderer.on('blur', this.onHotspotBlur.bind(this));
     this.reticleRenderer = new ReticleRenderer(this.camera);
 
     // Get the VR Display as soon as we initialize.
@@ -85,7 +85,7 @@ export default class WorldRenderer extends EventEmitter {
     });
   
     if (!scene || !scene.isValid()) {
-      this.didLoadFail_(scene.errorMessage);
+      this.didLoadFail(scene.errorMessage);
       return;
     }
   
@@ -96,7 +96,7 @@ export default class WorldRenderer extends EventEmitter {
       muted: scene.muted
     };
   
-    this.setDefaultYaw_(scene.defaultYaw || 0);
+    this.setDefaultYaw(scene.defaultYaw || 0);
   
     // Disable VR mode if explicitly disabled, or if we're loading a video on iOS 9 or earlier.
     // if (scene.isVROff || (scene.video && Util.isIOS9OrLess())) {
@@ -122,15 +122,15 @@ export default class WorldRenderer extends EventEmitter {
         // First load the preview.
         this.sphereRenderer.setPhotosphere(scene.preview, params).then(() => {
           // As soon as something is loaded, emit the load event to hide the loading progress bar.
-          this.didLoad_();
+          this.didLoad();
           // Then load the full resolution image.
           this.sphereRenderer.setPhotosphere(scene.image, params);
-        }).catch(this.didLoadFail_.bind(this));
+        }).catch(this.didLoadFail.bind(this));
       } else {
         // No preview -- go straight to rendering the full image.
         this.sphereRenderer.setPhotosphere(scene.image, params).then(() => {
-          this.didLoad_();
-        }).catch(this.didLoadFail_.bind(this));
+          this.didLoad();
+        }).catch(this.didLoadFail.bind(this));
       }
     } else if (scene.video) {
       if (Util.isIE11()) {
@@ -139,20 +139,20 @@ export default class WorldRenderer extends EventEmitter {
         // TODO(smus): Once video textures are supported, remove this fallback.
         if (scene.image) {
           this.sphereRenderer.setPhotosphere(scene.image, params).then(() => {
-            this.didLoad_();
-          }).catch(this.didLoadFail_.bind(this));
+            this.didLoad();
+          }).catch(this.didLoadFail.bind(this));
         } else {
-          this.didLoadFail_('Video is not supported on IE11.');
+          this.didLoadFail('Video is not supported on IE11.');
         }
       } else {
         this.player = new AdaptivePlayer(params);
         this.player.on('load', (videoElement: any, videoType: number) => {
           this.sphereRenderer.set360Video(videoElement, videoType, params).then(() => {
-            this.didLoad_({ videoElement: videoElement });
-          }).catch(this.didLoadFail_.bind(this));
+            this.didLoad({ videoElement: videoElement });
+          }).catch(this.didLoadFail.bind(this));
         });
         this.player.on('error', (error: any) => {
-          this.didLoadFail_('Video load error: ' + error);
+          this.didLoadFail('Video load error: ' + error);
         });
         this.player.load(scene.video);
   
@@ -180,9 +180,9 @@ export default class WorldRenderer extends EventEmitter {
 
   dispose() {
     const eyeLeft = this.scene.getObjectByName('eyeLeft');
-    this.disposeEye_(eyeLeft);
+    this.disposeEye(eyeLeft);
     const eyeRight = this.scene.getObjectByName('eyeRight');
-    this.disposeEye_(eyeRight);
+    this.disposeEye(eyeRight);
   }
 
   destroy() {
@@ -196,19 +196,19 @@ export default class WorldRenderer extends EventEmitter {
     const eyeRight = this.scene.getObjectByName('eyeRight');
   
     if (eyeLeft) {
-      this.disposeEye_(eyeLeft);
+      this.disposeEye(eyeLeft);
       photo.remove(eyeLeft);
       this.scene.remove(eyeLeft);
     }
   
     if (eyeRight) {
-      this.disposeEye_(eyeRight);
+      this.disposeEye(eyeRight);
       photo.remove(eyeRight);
       this.scene.remove(eyeRight);
     }
   }
 
-  disposeEye_(eye: any) {
+  private disposeEye(eye: any) {
     if (eye) {
       if (eye.material.map) {
         eye.material.map.dispose();
@@ -218,14 +218,14 @@ export default class WorldRenderer extends EventEmitter {
     }
   }
 
-  didLoad_(event: Object = {}) {
+  private didLoad(event: Object = {}) {
     this.emit('load', event);
     if (this.sceneResolve) {
       this.sceneResolve();
     }
   }
 
-  didLoadFail_(message: string) {
+  private didLoadFail(message: string) {
     this.emit('error', message);
     if (this.sceneReject) {
       this.sceneReject(message);
@@ -236,7 +236,7 @@ export default class WorldRenderer extends EventEmitter {
    * Sets the default yaw.
    * @param {Number} angleRad The yaw in radians.
    */
-  setDefaultYaw_(angleRad: number) {
+  private setDefaultYaw(angleRad: number) {
     // Rotate the camera parent to take into account the scene's rotation.
     // By default, it should be at the center of the image.
     // const display = this.controls.getVRDisplay();
@@ -250,7 +250,7 @@ export default class WorldRenderer extends EventEmitter {
     // }
 
     // this.camera.parent.rotation.y = (Math.PI / 2.0) + angleRad - theta;
-    // this.camera.parent.rotation.y = (Math.PI / 2.0) + angleRad;
+    this.camera.parent.rotation.y = (Math.PI / 2.0) + angleRad;
   }
 
   /**
@@ -266,7 +266,7 @@ export default class WorldRenderer extends EventEmitter {
         .start();
   }
 
-  init_(hideFullscreenButton: boolean) {
+  private init(hideFullscreenButton: boolean) {
     const container = document.querySelector('body');
     const aspect = window.innerWidth / window.innerHeight;
     const camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 100);
@@ -302,27 +302,27 @@ export default class WorldRenderer extends EventEmitter {
     // this.controls = controls;
     // this.manager = new WebVRManager(renderer, effect, { predistorted: false, hideButton: hideFullscreenButton });
   
-    this.scene = this.createScene_();
+    this.scene = this.createScene();
     this.scene.add(this.camera.parent);
   
     // Watch the resize event.
-    window.addEventListener('resize', this.onResize_.bind(this));
+    window.addEventListener('resize', this.onResize.bind(this));
   
     // Prevent context menu.
-    // window.addEventListener('contextmenu', this.onContextMenu_.bind(this));
-    window.addEventListener('vrdisplaypresentchange', this.onVRDisplayPresentChange_.bind(this));
+    // window.addEventListener('contextmenu', this.onContextMenu.bind(this));
+    window.addEventListener('vrdisplaypresentchange', this.onVRDisplayPresentChange.bind(this));
   }
 
-  onResize_() {
+  private onResize() {
     // this.effect.setSize(window.innerWidth, window.innerHeight);
     this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
   }
 
-  onVRDisplayPresentChange_(e: Event) {
+  private onVRDisplayPresentChange(e: Event) {
     console.log(e);
     if (Util.isDebug()) {
-      console.log('onVRDisplayPresentChange_');
+      console.log('onVRDisplayPresentChange');
     }
     const isVR = this.isVRMode();
   
@@ -332,7 +332,7 @@ export default class WorldRenderer extends EventEmitter {
     this.reticleRenderer.setVisibility(isReticleVisible);
   
     // Resize the renderer for good measure.
-    this.onResize_();
+    this.onResize();
   
     // Analytics.
     if (window.analytics) {
@@ -350,7 +350,7 @@ export default class WorldRenderer extends EventEmitter {
     this.emit('modechange', isVR);
   }
 
-  createScene_() {
+  private createScene() {
     const scene = new THREE.Scene();
   
     // Add a group for the photosphere.
@@ -361,23 +361,23 @@ export default class WorldRenderer extends EventEmitter {
     return scene;
   }
 
-  onHotspotFocus_(id: string) {
+  private onHotspotFocus(id: string) {
     console.log(id);
     // Set the default cursor to be a pointer.
-    this.setCursor_('pointer');
+    this.setCursor('pointer');
   }
 
-  onHotspotBlur_(id: string) {
+  private onHotspotBlur(id: string) {
     console.log(id);
     // Reset the default cursor to be the default one.
-    this.setCursor_('');
+    this.setCursor('');
   }
 
-  setCursor_(cursor: string) {
+  private setCursor(cursor: string) {
     this.renderer.domElement.style.cursor = cursor;
   }
 
-  onContextMenu_(e: Event) {
+  private onContextMenu(e: Event) {
     e.preventDefault();
     e.stopPropagation();
     return false;

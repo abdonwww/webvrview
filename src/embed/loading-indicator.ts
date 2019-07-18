@@ -6,12 +6,12 @@ export default class LoadingIndicator {
   el: HTMLDivElement;
 
   constructor() {
-    this.el = this.build_();
+    this.el = this.build();
     document.body.appendChild(this.el);
     this.show();
   }
 
-  build_() {
+  private build() {
     const overlay = document.createElement('div');
     const overlayStyle: CSSStyleDeclaration = overlay.style;
     overlayStyle.position = 'fixed';

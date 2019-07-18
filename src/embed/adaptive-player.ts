@@ -65,32 +65,32 @@ export default class AdaptivePlayer extends EventEmitter {
       case "m3u8": // HLS
         this.type = VIDEO_TYPE.HLS;
         if (Util.isSafari()) {
-          this.loadVideo_(url)
+          this.loadVideo(url)
             .then(() => {
               this.emit("load", this.video, this.type);
             })
-            .catch(this.onError_.bind(this));
+            .catch(this.onError.bind(this));
         } else {
-          this.onError_("HLS is only supported on Safari.");
+          this.onError("HLS is only supported on Safari.");
         }
         break;
       case "mpd": // MPEG-DASH
         this.type = VIDEO_TYPE.DASH;
-        this.loadShakaVideo_(url)
+        this.loadShakaVideo(url)
           .then(() => {
             console.log("The video has now been loaded!");
             this.emit("load", this.video, this.type);
           })
-          .catch(this.onError_.bind(this));
+          .catch(this.onError.bind(this));
         break;
       default:
         // A regular video, not an adaptive manifest.
         this.type = VIDEO_TYPE.VIDEO;
-        this.loadVideo_(url)
+        this.loadVideo(url)
           .then(() => {
             this.emit("load", this.video, this.type);
           })
-          .catch(this.onError_.bind(this));
+          .catch(this.onError.bind(this));
         break;
     }
   }
@@ -101,12 +101,12 @@ export default class AdaptivePlayer extends EventEmitter {
     this.video = null;
   }
 
-  onError_(errorMessage: string) {
+  private onError(errorMessage: string) {
     console.error(errorMessage);
     this.emit("error", errorMessage);
   }
 
-  loadVideo_(url: string) {
+  private loadVideo(url: string) {
     const video = this.video;
 
     return new Promise((resolve, reject) => {
@@ -123,7 +123,7 @@ export default class AdaptivePlayer extends EventEmitter {
     });
   }
 
-  initShaka_() {
+  private initShaka() {
     this.player = new shaka.Player(this.video);
   
     this.player.configure({
@@ -131,10 +131,10 @@ export default class AdaptivePlayer extends EventEmitter {
     });
   
     // Listen for error events.
-    this.player.addEventListener('error', this.onError_);
+    this.player.addEventListener('error', this.onError);
   }
 
-  loadShakaVideo_(url: string) {
+  private loadShakaVideo(url: string) {
     // Install built-in polyfills to patch browser incompatibilities.
     shaka.polyfill.installAll();
   
@@ -142,7 +142,7 @@ export default class AdaptivePlayer extends EventEmitter {
       console.error('Shaka is not supported on this browser.');
       return;
     }
-    this.initShaka_();
+    this.initShaka();
     return this.player.load(url);
   }
 }

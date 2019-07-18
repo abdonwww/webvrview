@@ -113,7 +113,7 @@ export default class SceneInfo {
       this.errorMessage = 'Either image or video URL must be specified.';
       return false;
     }
-    if (this.image && !this.isValidImage_(this.image)) {
+    if (this.image && !this.isValidImage(this.image)) {
       this.errorMessage = 'Invalid image URL: ' + this.image;
       return false;
     }
@@ -141,7 +141,7 @@ export default class SceneInfo {
     return url.substring(0, url.length - 1);
   }
 
-  isValidImage_(imageUrl: string) {
+  private isValidImage(imageUrl: string) {
     console.log(imageUrl);
     return true;
   }

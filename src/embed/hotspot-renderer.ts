@@ -348,7 +348,7 @@ export default class HotspotRenderer extends EventEmitter {
   }
 
   focus_(id: string) {
-    var hotspot = this.hotspots[id];
+    const hotspot = this.hotspots[id];
   
     // Tween scale of hotspot.
     this.tween = new TWEEN.Tween(hotspot.scale).to(FOCUS_SCALE, FOCUS_DURATION)
@@ -363,11 +363,9 @@ export default class HotspotRenderer extends EventEmitter {
   }
 
   blur_(id: string) {
-    var hotspot = this.hotspots[id];
+    const hotspot = this.hotspots[id];
   
-    this.tween = new TWEEN.Tween(hotspot.scale).to(NORMAL_SCALE, FOCUS_DURATION)
-        .easing(TWEEN.Easing.Quadratic.InOut)
-        .start();
+    this.tween = new TWEEN.Tween(hotspot.scale).to(NORMAL_SCALE, FOCUS_DURATION).easing(TWEEN.Easing.Quadratic.InOut).start();
     
     if (this.timeForHospotClick) {
       clearTimeout( this.timeForHospotClick );
@@ -376,26 +374,24 @@ export default class HotspotRenderer extends EventEmitter {
 
   down_(id: string) {
     // Become active.
-    var hotspot = this.hotspots[id];
-    var outer = hotspot.getObjectByName('inner');
+    const hotspot = this.hotspots[id];
+    const outer = hotspot.getObjectByName('inner');
   
-    this.tween = new TWEEN.Tween(outer.material.color).to(ACTIVE_COLOR, ACTIVE_DURATION)
-        .start();
+    this.tween = new TWEEN.Tween(outer.material.color).to(ACTIVE_COLOR, ACTIVE_DURATION).start();
   }
 
   up_(id: string) {
     // Become inactive.
-    var hotspot = this.hotspots[id];
-    var outer = hotspot.getObjectByName('inner');
+    const hotspot = this.hotspots[id];
+    const outer = hotspot.getObjectByName('inner');
   
-    this.tween = new TWEEN.Tween(outer.material.color).to(INACTIVE_COLOR, ACTIVE_DURATION)
-        .start();
+    this.tween = new TWEEN.Tween(outer.material.color).to(INACTIVE_COLOR, ACTIVE_DURATION).start();
   }
 
   setOpacity_(id: string, opacity: number) {
-    var hotspot = this.hotspots[id];
-    var outer = hotspot.getObjectByName('outer');
-    var inner = hotspot.getObjectByName('inner');
+    const hotspot = this.hotspots[id];
+    const outer = hotspot.getObjectByName('outer');
+    const inner = hotspot.getObjectByName('inner');
   
     outer.material.opacity = opacity * MAX_OUTER_OPACITY;
     inner.material.opacity = opacity * MAX_INNER_OPACITY;

@@ -14,7 +14,7 @@ export default class SphereRenderer {
     this.scene = scene;
 
     // Create a transparent mask.
-    this.createOpacityMask_();
+    this.createOpacityMask();
   }
 
   /**
@@ -36,7 +36,7 @@ export default class SphereRenderer {
       // Load texture.
       const loader = new THREE.TextureLoader();
       loader.crossOrigin = 'anonymous';
-      loader.load(src, this.onTextureLoaded_.bind(this), undefined, this.onTextureError_.bind(this));
+      loader.load(src, this.onTextureLoaded.bind(this), undefined, this.onTextureError.bind(this));
     });
   }
 
@@ -69,7 +69,7 @@ export default class SphereRenderer {
   
       videoTexture.needsUpdate = true;
   
-      this.onTextureLoaded_(videoTexture);
+      this.onTextureLoaded(videoTexture);
     });
   }
 
@@ -98,15 +98,15 @@ export default class SphereRenderer {
     });
   }
 
-  onTextureLoaded_(texture: any) {
+  private onTextureLoaded(texture: any) {
     let sphereLeft;
     let sphereRight;
     if (this.isStereo) {
-      sphereLeft = this.createPhotosphere_(texture, {offsetY: 0.5, scaleY: 0.5});
-      sphereRight = this.createPhotosphere_(texture, {offsetY: 0, scaleY: 0.5});
+      sphereLeft = this.createPhotosphere(texture, {offsetY: 0.5, scaleY: 0.5});
+      sphereRight = this.createPhotosphere(texture, {offsetY: 0, scaleY: 0.5});
     } else {
-      sphereLeft = this.createPhotosphere_(texture);
-      sphereRight = this.createPhotosphere_(texture);
+      sphereLeft = this.createPhotosphere(texture);
+      sphereRight = this.createPhotosphere(texture);
     }
   
     // Display in left and right eye respectively.
@@ -121,11 +121,11 @@ export default class SphereRenderer {
     this.resolve();
   }
 
-  onTextureError_(error: string) {
+  private onTextureError(error: string) {
     this.reject('Unable to load texture from "' + this.src + '"');
   }
 
-  createPhotosphere_(texture: any, opt_params: any = {}) {
+  private createPhotosphere(texture: any, opt_params: any = {}) {
     var p = opt_params;
     p.scaleX = p.scaleX || 1;
     p.scaleY = p.scaleY || 1;
@@ -136,9 +136,10 @@ export default class SphereRenderer {
     p.thetaStart = p.thetaStart || 0;
     p.thetaLength = p.thetaLength || Math.PI;
   
-    var geometry = new THREE.SphereGeometry(1, 48, 48, p.phiStart, p.phiLength, p.thetaStart, p.thetaLength);
+    const geometry = new THREE.SphereGeometry(1, 48, 48, p.phiStart, p.phiLength, p.thetaStart, p.thetaLength);
     geometry.applyMatrix(new THREE.Matrix4().makeScale(-1, 1, 1));
-    var uvs = geometry.faceVertexUvs[0];
+
+    const uvs = geometry.faceVertexUvs[0];
     for (var i = 0; i < uvs.length; i ++) {
       for (var j = 0; j < 3; j ++) {
         uvs[i][j].x *= p.scaleX;
@@ -148,7 +149,7 @@ export default class SphereRenderer {
       }
     }
   
-    var material;
+    let material;
     if (texture.format === THREE.RGBAFormat && texture.flipY === false) {
       material = new THREE.ShaderMaterial({
         uniforms: {
@@ -178,7 +179,7 @@ export default class SphereRenderer {
     return out;
   }
 
-  createOpacityMask_() {
+  private createOpacityMask() {
     const geometry = new THREE.SphereGeometry(0.49, 48, 48);
     const material = new THREE.MeshBasicMaterial({
       color: 0x000000,

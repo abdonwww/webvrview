@@ -21,10 +21,10 @@ import Util from "../shared/util";
 export default class IFrameMessageReceiver extends EventEmitter {
   constructor() {
     super();
-    window.addEventListener('message', this.onMessage_.bind(this), false);
+    window.addEventListener('message', this.onMessage.bind(this), false);
   }
 
-  onMessage_(event: any) {
+  private onMessage(event: any) {
     if (Util.isDebug()) {
       console.log('onMessage_', event);
     }

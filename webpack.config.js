@@ -8,7 +8,7 @@ module.exports = {
     embed: "./src/embed/index.ts",
   },
   output: {
-    path: __dirname + "/build",
+    path: path.resolve(__dirname, "build"),
     filename: "[name].js",
   },
   // Enable sourcemaps for debugging webpack's output.
@@ -27,7 +27,14 @@ module.exports = {
       // All files with a '.ts' extension will be handled by 'awesome-typescript-loader'.
       { test: /\.ts$/, loader: "awesome-typescript-loader" },
       // All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
-      { enforce: "pre", test: /\.js$/, loader: "source-map-loader" },
+      {
+        enforce: "pre",
+        test: /\.js$/,
+        loader: "source-map-loader",
+        exclude: [
+          path.resolve(__dirname, "node_modules"),
+        ]
+      },
     ]
   },
   // When importing a module whose path matches one of the following, just
