@@ -31,6 +31,11 @@
   resolved "http://npm.air-closet.com:4873/@types%2fnode/-/node-12.0.8.tgz#551466be11b2adc3f3d47156758f610bd9f6b1d8"
   integrity sha512-b8bbUOTwzIY3V5vDTY1fIJ+ePKDUBqt2hC2woVGotdQQhG/2Sh62HOKHrT7ab+VerXAcPyAiTEipPu/FsreUtg==
 
+"@types/stats.js@^0.17.0":
+  version "0.17.0"
+  resolved "http://npm.air-closet.com:4873/@types%2fstats.js/-/stats.js-0.17.0.tgz#0ed81d48e03b590c24da85540c1d952077a9fe20"
+  integrity sha512-9w+a7bR8PeB0dCT/HBULU2fMqf6BAzvKbxFboYhmDtDkKPiyXYbjoe2auwsXlEFI7CFNMF1dCv3dFH5Poy9R1w==
+
 "@types/tween.js@^17.2.0":
   version "17.2.0"
   resolved "http://npm.air-closet.com:4873/@types%2ftween.js/-/tween.js-17.2.0.tgz#25f98311daecb165ab91ee2cd7f17a9b1e6cc30c"
@@ -3604,6 +3609,11 @@ static-extend@^0.1.1:
   dependencies:
     define-property "^0.2.5"
     object-copy "^0.1.0"
+
+stats.js@^0.17.0:
+  version "0.17.0"
+  resolved "http://npm.air-closet.com:4873/stats.js/-/stats.js-0.17.0.tgz#b1c3dc46d94498b578b7fd3985b81ace7131cc7d"
+  integrity sha1-scPcRtlEmLV4t/05hbgaznExzH0=
 
 "statuses@>= 1.4.0 < 2", "statuses@>= 1.5.0 < 2", statuses@~1.5.0:
   version "1.5.0"

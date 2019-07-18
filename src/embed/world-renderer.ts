@@ -257,7 +257,7 @@ export default class WorldRenderer extends EventEmitter {
    * Do the initial camera tween to rotate the camera, giving an indication that
    * there is live content there (on desktop only).
    */
-  autopan(duration: number) {
+  autopan(duration?: number) {
     console.log(duration);
     const targetY = this.camera.parent.rotation.y - AUTOPAN_ANGLE;
     const tween = new TWEEN.Tween(this.camera.parent.rotation)
