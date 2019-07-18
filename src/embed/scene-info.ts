@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import Util from '../util';
+import Util from "../shared/util";
 
 const CAMEL_TO_UNDERSCORE = {
   video: 'video',

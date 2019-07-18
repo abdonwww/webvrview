@@ -1,6 +1,6 @@
 import { EventEmitter } from 'eventemitter3';
-import Message from '../message';
-import Util from '../util';
+import { MESSAGE } from "../shared/constants";
+import Util from "../shared/util";
 
 /**
  * Sits in an embedded iframe, receiving messages from a containing
@@ -34,15 +34,15 @@ export default class IFrameMessageReceiver extends EventEmitter {
     var data = message.data;
   
     switch (type) {
-      case Message.SET_CONTENT:
-      case Message.SET_VOLUME:
-      case Message.MUTED:
-      case Message.ADD_HOTSPOT:
-      case Message.PLAY:
-      case Message.PAUSE:
-      case Message.SET_CURRENT_TIME:
-      case Message.GET_POSITION:
-      case Message.SET_FULLSCREEN:
+      case MESSAGE.SET_CONTENT:
+      case MESSAGE.SET_VOLUME:
+      case MESSAGE.MUTED:
+      case MESSAGE.ADD_HOTSPOT:
+      case MESSAGE.PLAY:
+      case MESSAGE.PAUSE:
+      case MESSAGE.SET_CURRENT_TIME:
+      case MESSAGE.GET_POSITION:
+      case MESSAGE.SET_FULLSCREEN:
         this.emit(type, data);
         break;
       default:

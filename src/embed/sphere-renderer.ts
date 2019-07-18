@@ -1,8 +1,7 @@
 import * as THREE from 'three';
 import * as TWEEN from '@tweenjs/tween.js';
-import Eyes from './eyes';
-import VideoType from './video-type';
-import Util from '../util';
+import { VIDEO_TYPE, EYE } from "../shared/constants";
+import Util from "../shared/util";
 
 export default class SphereRenderer {
   scene: any;
@@ -60,7 +59,7 @@ export default class SphereRenderer {
       videoTexture.magFilter = THREE.LinearFilter;
       videoTexture.generateMipmaps = false;
   
-      if (Util.isSafari() && videoType === VideoType.HLS) {
+      if (Util.isSafari() && videoType === VIDEO_TYPE.HLS) {
         // fix black screen issue on safari
         videoTexture.format = THREE.RGBAFormat;
         videoTexture.flipY = false;
@@ -92,7 +91,7 @@ export default class SphereRenderer {
       const tween = new TWEEN.Tween({ opacity: mask.material.opacity })
           .to({ opacity: overlayOpacity }, duration)
           .easing(TWEEN.Easing.Quadratic.InOut);
-      tween.onUpdate(function(e) {
+      tween.onUpdate(function() {
         mask.material.opacity = this.opacity;
       });
       tween.onComplete(resolve).start();
@@ -111,11 +110,11 @@ export default class SphereRenderer {
     }
   
     // Display in left and right eye respectively.
-    sphereLeft.layers.set(Eyes.LEFT);
-    sphereLeft.eye = Eyes.LEFT;
+    sphereLeft.layers.set(EYE.LEFT);
+    sphereLeft.eye = EYE.LEFT;
     sphereLeft.name = 'eyeLeft';
-    sphereRight.layers.set(Eyes.RIGHT);
-    sphereRight.eye = Eyes.RIGHT;
+    sphereRight.layers.set(EYE.RIGHT);
+    sphereRight.eye = EYE.RIGHT;
     sphereRight.name = 'eyeRight';
   
     this.scene.getObjectByName('photo').children = [sphereLeft, sphereRight];

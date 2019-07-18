@@ -1,4 +1,4 @@
-import Message from '../message';
+import { MESSAGE } from "../shared/constants";
 
 /**
  * Sends events to the embedded VR view IFrame via postMessage. Also handles
@@ -34,7 +34,7 @@ export default class IFrameMessageSender {
 
   onDeviceMotion_(e: any) {
     var message = {
-      type: Message.DEVICE_MOTION,
+      type: MESSAGE.DEVICE_MOTION,
       deviceMotionEvent: this.cloneDeviceMotionEvent_(e)
     };
 

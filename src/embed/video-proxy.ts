@@ -1,4 +1,4 @@
-import Util from '../util';
+import Util from "../shared/util";
 
 /**
  * A proxy class for working around the fact that as soon as a video is play()ed

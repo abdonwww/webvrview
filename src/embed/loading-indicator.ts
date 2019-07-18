@@ -1,6 +1,7 @@
 /**
  * Shows a 2D loading indicator while various pieces of EmbedVR load.
  */
+
 export default class LoadingIndicator {
   el: HTMLDivElement;
 

@@ -1,7 +1,8 @@
+
 import { EventEmitter } from 'eventemitter3';
 import shaka from 'shaka-player';
-import Types from '../video-type';
-import Util from '../util';
+import { VIDEO_TYPE } from "../shared/constants";
+import Util from "../shared/util";
 
 /**
  * Supports regular video URLs (eg. mp4), as well as adaptive manifests like
@@ -20,10 +21,11 @@ interface Params {
   muted: boolean;
 }
 
-var DEFAULT_BITS_PER_SECOND = 1000000;
+const DEFAULT_BITS_PER_SECOND = 1000000;
 
 export default class AdaptivePlayer extends EventEmitter {
   video: HTMLVideoElement;
+  type: number;
   player: any;
 
   constructor(params: Params) {
@@ -32,7 +34,7 @@ export default class AdaptivePlayer extends EventEmitter {
     this.video = document.createElement('video');
     // Loop by default.
     if (params.loop === true) {
-      this.video.setAttribute('loop', 'true');
+      this.video.setAttribute("loop", "true");
     }
 
     if (params.volume !== undefined) {
@@ -53,60 +55,65 @@ export default class AdaptivePlayer extends EventEmitter {
   }
 
   load(url: string) {
-    var self = this;
     // TODO(smus): Investigate whether or not differentiation is best done by
     // mimeType after all. Cursory research suggests that adaptive streaming
     // manifest mime types aren't properly supported.
     //
     // For now, make determination based on extension.
-    var extension = Util.getExtension(url);
+    const extension = Util.getExtension(url);
     switch (extension) {
-      case 'm3u8': // HLS
-        this.type = Types.HLS;
+      case "m3u8": // HLS
+        this.type = VIDEO_TYPE.HLS;
         if (Util.isSafari()) {
-          this.loadVideo_(url).then(function() {
-            self.emit('load', self.video, self.type);
-          }).catch(this.onError_.bind(this));
+          this.loadVideo_(url)
+            .then(() => {
+              this.emit("load", this.video, this.type);
+            })
+            .catch(this.onError_.bind(this));
         } else {
-          self.onError_('HLS is only supported on Safari.');
+          this.onError_("HLS is only supported on Safari.");
         }
         break;
-      case 'mpd': // MPEG-DASH
-        this.type = Types.DASH;
-        this.loadShakaVideo_(url).then(function() {
-          console.log('The video has now been loaded!');
-          self.emit('load', self.video, self.type);
-        }).catch(this.onError_.bind(this));
+      case "mpd": // MPEG-DASH
+        this.type = VIDEO_TYPE.DASH;
+        this.loadShakaVideo_(url)
+          .then(() => {
+            console.log("The video has now been loaded!");
+            this.emit("load", this.video, this.type);
+          })
+          .catch(this.onError_.bind(this));
         break;
-      default: // A regular video, not an adaptive manifest.
-        this.type = Types.VIDEO;
-        this.loadVideo_(url).then(function() {
-          self.emit('load', self.video, self.type);
-        }).catch(this.onError_.bind(this));
+      default:
+        // A regular video, not an adaptive manifest.
+        this.type = VIDEO_TYPE.VIDEO;
+        this.loadVideo_(url)
+          .then(() => {
+            this.emit("load", this.video, this.type);
+          })
+          .catch(this.onError_.bind(this));
         break;
     }
   }
 
   destroy() {
     this.video.pause();
-    this.video.src = '';
+    this.video.src = "";
     this.video = null;
   }
 
-  /*** PRIVATE API ***/
-
-  onError_(e: string) {
-    console.error(e);
-    this.emit('error', e);
+  onError_(errorMessage: string) {
+    console.error(errorMessage);
+    this.emit("error", errorMessage);
   }
 
   loadVideo_(url: string) {
-    var self = this, video = self.video;
-    return new Promise(function(resolve, reject) {
+    const video = this.video;
+
+    return new Promise((resolve, reject) => {
       video.src = url;
-      video.addEventListener('canplaythrough', resolve);
-      video.addEventListener('loadedmetadata', function() {
-        self.emit('timeupdate', {
+      video.addEventListener("canplaythrough", resolve);
+      video.addEventListener("loadedmetadata", () => {
+        this.emit("timeupdate", {
           currentTime: video.currentTime,
           duration: video.duration
         });
@@ -135,7 +142,6 @@ export default class AdaptivePlayer extends EventEmitter {
       console.error('Shaka is not supported on this browser.');
       return;
     }
-  
     this.initShaka_();
     return this.player.load(url);
   }
