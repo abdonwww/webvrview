@@ -6,6 +6,7 @@ module.exports = {
   entry: {
     webvrview: "./src/webvrview/index.ts",
     embed: "./src/embed/index.ts",
+    player: "./src/player/index.ts",
   },
   output: {
     path: path.resolve(__dirname, "build"),

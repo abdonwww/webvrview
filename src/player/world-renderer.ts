@@ -287,7 +287,7 @@ export default class WorldRenderer extends EventEmitter {
     const renderer = new THREE.WebGLRenderer({
       antialias: false,
     });
-    // renderer.vr.enabled = true;
+    renderer.vr.enabled = true;
     renderer.setClearColor(0x000000, 0);
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
