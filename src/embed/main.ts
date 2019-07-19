@@ -50,7 +50,14 @@ function onLoad() {
     const WebVRConfig = window.WebVRConfig || {};
     WebVRConfig.YAW_ONLY = true;
   }
-  requestAnimationFrame(loop);
+//   requestAnimationFrame(loop);
+
+  worldRenderer.renderer.setAnimationLoop((time: number) => {
+    // console.log(time);
+    // worldRenderer.renderer.render(worldRenderer.scene, worldRenderer.camera);
+    worldRenderer.render(time);
+    worldRenderer.submitFrame();
+  });
 }
 
 function loop(time: number) {

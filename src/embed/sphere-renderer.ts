@@ -101,9 +101,10 @@ export default class SphereRenderer {
   private onTextureLoaded(texture: any) {
     let sphereLeft;
     let sphereRight;
+
     if (this.isStereo) {
-      sphereLeft = this.createPhotosphere(texture, {offsetY: 0.5, scaleY: 0.5});
-      sphereRight = this.createPhotosphere(texture, {offsetY: 0, scaleY: 0.5});
+      sphereLeft = this.createPhotosphere(texture, { offsetY: 0.5, scaleY: 0.5 });
+      sphereRight = this.createPhotosphere(texture, { offsetY: 0, scaleY: 0.5 });
     } else {
       sphereLeft = this.createPhotosphere(texture);
       sphereRight = this.createPhotosphere(texture);
@@ -117,7 +118,9 @@ export default class SphereRenderer {
     // sphereRight.eye = EYE.RIGHT;
     sphereRight.name = 'eyeRight';
   
-    this.scene.getObjectByName('photo').children = [sphereLeft, sphereRight];
+    // this.scene.getObjectByName('photo').children = [sphereLeft, sphereRight];
+    this.scene.getObjectByName('photo').add(sphereLeft, sphereRight);
+    console.log(this.scene.getObjectByName('photo'));
     this.resolve();
   }
 
@@ -174,7 +177,7 @@ export default class SphereRenderer {
       material = new THREE.MeshBasicMaterial({ map: texture });
     }
     const out = new THREE.Mesh(geometry, material);
-    //out.visible = false;
+    // out.visible = false;
     out.renderOrder = -1;
     return out;
   }

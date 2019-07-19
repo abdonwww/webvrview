@@ -57,6 +57,8 @@ export default class WorldRenderer extends EventEmitter {
     super();
     this.init(params.hideFullscreenButton);
 
+    console.log(this.scene);
+
     this.sphereRenderer = new SphereRenderer(this.scene);
     // this.hotspotRenderer = new HotspotRenderer(this);
     // this.hotspotRenderer.on('focus', this.onHotspotFocus.bind(this));
@@ -74,6 +76,7 @@ export default class WorldRenderer extends EventEmitter {
   render(time: number) {
     // this.controls.update();
     TWEEN.update(time);
+    this.renderer.render(this.scene, this.camera);
     // this.effect.render(this.scene, this.camera);
     // this.hotspotRenderer.update(this.camera);
   }
@@ -273,9 +276,11 @@ export default class WorldRenderer extends EventEmitter {
     const container = document.querySelector('body');
     const aspect = window.innerWidth / window.innerHeight;
     const camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 100);
+    camera.name = 'camera';
     camera.layers.enable(1);
   
     const cameraDummy = new THREE.Object3D();
+    cameraDummy.name = 'cameraDummy';
     cameraDummy.add(camera);
   
     // Antialiasing disabled to improve performance.
@@ -321,6 +326,7 @@ export default class WorldRenderer extends EventEmitter {
     // this.effect.setSize(window.innerWidth, window.innerHeight);
     this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
+    this.renderer.setSize( window.innerWidth, window.innerHeight );
   }
 
   private onVRDisplayPresentChange(e: Event) {
