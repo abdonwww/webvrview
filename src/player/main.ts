@@ -22,7 +22,7 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerH
 const renderer = new THREE.WebGLRenderer({ antialias: false });
 renderer.setPixelRatio( window.devicePixelRatio );
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.vr.enabled = true;
+renderer.vr.enabled = true; // this changes camera position (x: 0, y: 1.6, z: 0) https://github.com/mrdoob/three.js/issues/14994
 
 document.body.appendChild(renderer.domElement);
 document.body.appendChild(WEBVR.createButton(renderer));
@@ -33,7 +33,6 @@ const cube = new THREE.Mesh(geometry, material);
 cube.position.set( 0, 1.6, -5 ); // Test
 
 scene.add(cube);
-// camera.position.z = 5;
 
 const loop = (time: number) => {
   console.log('position', camera.position);
