@@ -1,12 +1,15 @@
 import { EventEmitter } from 'eventemitter3';
 import * as THREE from 'three';
 import TWEEN from '@tweenjs/tween.js';
+import WEBVR from './three.webvr';
 import AdaptivePlayer from './adaptive-player';
 // import HotspotRenderer from './hotspot-renderer';
 import ReticleRenderer from './reticle-renderer';
 import SphereRenderer from './sphere-renderer';
 import VideoProxy from './video-proxy';
 import Util from "../shared/util";
+
+// https://threejs.org/docs/#manual/en/introduction/How-to-create-VR-content
 
 // const WebVRManager = require('webvr-boilerplate');
 
@@ -285,6 +288,7 @@ export default class WorldRenderer extends EventEmitter {
     renderer.setPixelRatio(window.devicePixelRatio);
   
     container.appendChild(renderer.domElement);
+    container.appendChild(WEBVR.createButton(renderer));
   
     // const controls = new THREE.VRControls(camera);
     // const effect = new THREE.VREffect(renderer);
