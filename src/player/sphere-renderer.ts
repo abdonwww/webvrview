@@ -1,5 +1,5 @@
-import * as THREE from 'three';
-import TWEEN from '@tweenjs/tween.js';
+import * as THREE from "three";
+import TWEEN from "@tweenjs/tween.js";
 import { VIDEO_TYPE, EYE } from "../shared/constants";
 import Util from "../shared/util";
 
@@ -27,16 +27,21 @@ export default class SphereRenderer {
     return new Promise((resolve: Function, reject: Function) => {
       this.resolve = resolve;
       this.reject = reject;
-  
+
       const params = opt_params || {};
-  
+
       this.isStereo = !!params.isStereo;
       this.src = src;
-  
+
       // Load texture.
       const loader = new THREE.TextureLoader();
-      loader.crossOrigin = 'anonymous';
-      loader.load(src, this.onTextureLoaded.bind(this), undefined, this.onTextureError.bind(this));
+      loader.crossOrigin = "anonymous";
+      loader.load(
+        src,
+        this.onTextureLoaded.bind(this),
+        undefined,
+        this.onTextureError.bind(this)
+      );
     });
   }
 
@@ -48,17 +53,17 @@ export default class SphereRenderer {
     return new Promise((resolve: Function, reject: Function) => {
       this.resolve = resolve;
       this.reject = reject;
-  
+
       var params = opt_params || {};
-  
+
       this.isStereo = !!params.isStereo;
-  
+
       // Load the video texture.
       const videoTexture = new THREE.VideoTexture(videoElement);
       videoTexture.minFilter = THREE.LinearFilter;
       videoTexture.magFilter = THREE.LinearFilter;
       videoTexture.generateMipmaps = false;
-  
+
       if (Util.isSafari() && videoType === VIDEO_TYPE.HLS) {
         // fix black screen issue on safari
         videoTexture.format = THREE.RGBAFormat;
@@ -66,9 +71,9 @@ export default class SphereRenderer {
       } else {
         videoTexture.format = THREE.RGBFormat;
       }
-  
+
       videoTexture.needsUpdate = true;
-  
+
       this.onTextureLoaded(videoTexture);
     });
   }
@@ -87,10 +92,10 @@ export default class SphereRenderer {
     // If we want the opacity
     const overlayOpacity = 1 - opacity;
     return new Promise((resolve: any) => {
-      const mask = scene.getObjectByName('opacityMask');
+      const mask = scene.getObjectByName("opacityMask");
       const tween = new TWEEN.Tween({ opacity: mask.material.opacity })
-          .to({ opacity: overlayOpacity }, duration)
-          .easing(TWEEN.Easing.Quadratic.InOut);
+        .to({ opacity: overlayOpacity }, duration)
+        .easing(TWEEN.Easing.Quadratic.InOut);
       tween.onUpdate(function() {
         mask.material.opacity = this.opacity;
       });
@@ -103,24 +108,30 @@ export default class SphereRenderer {
     let sphereRight;
 
     if (this.isStereo) {
-      sphereLeft = this.createPhotosphere(texture, { offsetY: 0.5, scaleY: 0.5 });
-      sphereRight = this.createPhotosphere(texture, { offsetY: 0, scaleY: 0.5 });
+      sphereLeft = this.createPhotosphere(texture, {
+        offsetY: 0.5,
+        scaleY: 0.5
+      });
+      sphereRight = this.createPhotosphere(texture, {
+        offsetY: 0,
+        scaleY: 0.5
+      });
     } else {
       sphereLeft = this.createPhotosphere(texture);
       sphereRight = this.createPhotosphere(texture);
     }
-  
+
     // Display in left and right eye respectively.
     sphereLeft.layers.set(EYE.LEFT);
     // sphereLeft.eye = EYE.LEFT;
-    sphereLeft.name = 'eyeLeft';
+    sphereLeft.name = "eyeLeft";
     sphereRight.layers.set(EYE.RIGHT);
     // sphereRight.eye = EYE.RIGHT;
-    sphereRight.name = 'eyeRight';
-  
+    sphereRight.name = "eyeRight";
+
     // this.scene.getObjectByName('photo').children = [sphereLeft, sphereRight];
-    this.scene.getObjectByName('photo').add(sphereLeft, sphereRight);
-    console.log(this.scene.getObjectByName('photo'));
+    this.scene.getObjectByName("photo").add(sphereLeft, sphereRight);
+    console.log(this.scene.getObjectByName("photo"));
     this.resolve();
   }
 
@@ -138,20 +149,28 @@ export default class SphereRenderer {
     p.phiLength = p.phiLength || Math.PI * 2;
     p.thetaStart = p.thetaStart || 0;
     p.thetaLength = p.thetaLength || Math.PI;
-  
-    const geometry = new THREE.SphereGeometry(1, 48, 48, p.phiStart, p.phiLength, p.thetaStart, p.thetaLength);
+
+    const geometry = new THREE.SphereGeometry(
+      1,
+      48,
+      48,
+      p.phiStart,
+      p.phiLength,
+      p.thetaStart,
+      p.thetaLength
+    );
     geometry.applyMatrix(new THREE.Matrix4().makeScale(-1, 1, 1));
 
     const uvs = geometry.faceVertexUvs[0];
-    for (var i = 0; i < uvs.length; i ++) {
-      for (var j = 0; j < 3; j ++) {
+    for (var i = 0; i < uvs.length; i++) {
+      for (var j = 0; j < 3; j++) {
         uvs[i][j].x *= p.scaleX;
         uvs[i][j].x += p.offsetX;
         uvs[i][j].y *= p.scaleY;
         uvs[i][j].y += p.offsetY;
       }
     }
-  
+
     let material;
     if (texture.format === THREE.RGBAFormat && texture.flipY === false) {
       material = new THREE.ShaderMaterial({
@@ -169,7 +188,9 @@ export default class SphereRenderer {
           "uniform sampler2D texture;",
           "varying vec2 vUV;",
           "void main() {",
-          " gl_FragColor = texture2D( texture, vUV  )" + (Util.isIOS() ? ".bgra" : "") + ";",
+          " gl_FragColor = texture2D( texture, vUV  )" +
+            (Util.isIOS() ? ".bgra" : "") +
+            ";",
           "}"
         ].join("\n")
       });
@@ -191,11 +212,10 @@ export default class SphereRenderer {
       transparent: true
     });
     const opacityMask = new THREE.Mesh(geometry, material);
-    opacityMask.name = 'opacityMask';
+    opacityMask.name = "opacityMask";
     opacityMask.renderOrder = 1;
-  
+
     this.scene.add(opacityMask);
     return opacityMask;
   }
 }
-
