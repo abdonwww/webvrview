@@ -9,12 +9,12 @@ import Util from "../shared/util";
  * can remove this code.
  */
 export default class VideoProxy {
-  videoElement: any;
-  audioElement: any;
+  videoElement: HTMLVideoElement;
+  audioElement: HTMLAudioElement;
   isFakePlayback: boolean;
   startTime: any;
 
-  constructor(videoElement: any) {
+  constructor(videoElement: HTMLVideoElement) {
     this.videoElement = videoElement;
     // True if we're currently manually advancing the playhead (only on iOS).
     this.isFakePlayback = false;

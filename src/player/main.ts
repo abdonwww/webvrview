@@ -1,9 +1,9 @@
-// import WebVRPolyfill from 'webvr-polyfill';
+import WebVRPolyfill from 'webvr-polyfill';
 import Stats from "stats.js";
 import TWEEN from "@tweenjs/tween.js";
 import WorldRenderer from "./WorldRenderer";
 
-// new WebVRPolyfill();
+new WebVRPolyfill();
 const stats = new Stats();
 
 const showStats = () => {
@@ -17,16 +17,11 @@ const showStats = () => {
 showStats();
 
 const worldRenderer = new WorldRenderer();
-
 worldRenderer.setScene({});
-
 worldRenderer.renderer.setAnimationLoop((time: number) => {
-  console.log("position", worldRenderer.camera.position);
+  // console.log("position", worldRenderer.camera.position);
   stats.begin();
-  // TWEEN.update(time);
-  // cube.rotation.x += 0.01;
-  // cube.rotation.y += 0.01;
-  // worldRenderer.renderer.render(worldRenderer.scene, worldRenderer.camera);
+  TWEEN.update(time);
   worldRenderer.render();
   stats.end();
 });

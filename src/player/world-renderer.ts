@@ -5,7 +5,7 @@ import WEBVR from './three.webvr';
 import AdaptivePlayer from './adaptive-player';
 // import HotspotRenderer from './hotspot-renderer';
 import ReticleRenderer from './reticle-renderer';
-import SphereRenderer from './sphere-renderer';
+import SphereRenderer from './SphereRenderer';
 import VideoProxy from './video-proxy';
 import Util from "../shared/util";
 
@@ -153,7 +153,7 @@ export default class WorldRenderer extends EventEmitter {
       } else {
         this.player = new AdaptivePlayer(params);
         this.player.on('load', (videoElement: any, videoType: number) => {
-          this.sphereRenderer.set360Video(videoElement, videoType, params).then(() => {
+          this.sphereRenderer.setVideosphere(videoElement, videoType, params).then(() => {
             this.didLoad({ videoElement: videoElement });
           }).catch(this.didLoadFail.bind(this));
         });
