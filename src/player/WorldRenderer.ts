@@ -6,7 +6,7 @@ import AdaptivePlayer from "./AdaptivePlayer";
 // import HotspotRenderer from './hotspot-renderer';
 // import ReticleRenderer from "./reticle-renderer";
 import SphereRenderer from "./SphereRenderer";
-import VideoProxy from "./video-proxy";
+import VideoProxy from "./VideoProxy";
 import Util from "../shared/util";
 
 // https://threejs.org/docs/#manual/en/introduction/How-to-create-VR-content
@@ -102,6 +102,8 @@ export default class WorldRenderer extends EventEmitter {
       this.sceneReject = reject;
     });
 
+    this.sceneInfo = scene;
+
     // const params = {
     //   isStereo: scene.isStereo,
     //   loop: scene.loop,
@@ -109,34 +111,29 @@ export default class WorldRenderer extends EventEmitter {
     //   muted: scene.muted
     // };
 
-    // this.setDefaultYaw(scene.defaultYaw || 0);
-
     const params = {
       isStereo: false,
       loop: true,
       volume: 1, // 0 - 1
-      muted: false
+      muted: true, // autoplay throw DOMExeption if muted property is false
     };
 
-    // this.sphereRenderer.setPhotosphere("/assets/gallery/taj-mahal.jpg", params);
+    this.setDefaultYaw(scene.defaultYaw || 0);
 
-    // this.sphereRenderer
-    //   .setPhotosphere(scene.image, params)
-    //   .then(() => {
-    //     this.didLoad();
-    //   })
-    //   .catch(this.didLoadFail.bind(this));
-
-    // this.sceneInfo = scene;
+    // this.sphereRenderer.setPhotosphere("/assets/gallery/taj-mahal.jpg", params).then(() => {
+    //   this.didLoad();
+    // }).catch((error: any) => {
+    //   this.didError(error);
+    // });
 
     this.player = new AdaptivePlayer(params);
     this.player.on('load', (videoElement: any, videoType: number) => {
       this.sphereRenderer.setVideosphere(videoElement, videoType, params).then(() => {
-        this.videoProxy.play();
+        this.didLoad({ videoElement: videoElement });
+        this.videoProxy.play(); // Test
+      }).catch((error: any) => {
+        this.didError(error);
       });
-      // this.sphereRenderer.set360Video(videoElement, videoType, params).then(() => {
-        
-      // }).catch(this.didLoadFail.bind(this));
     });
     // this.player.on('error', (error: any) => {});
     this.player.load("/assets/dash/richoh1_0.mpd");
@@ -148,8 +145,56 @@ export default class WorldRenderer extends EventEmitter {
     return promise;
   }
 
+  autopan() {
+    const AUTOPAN_DURATION: number = 3000;
+    const AUTOPAN_ANGLE: number = 0.4;
+
+    const targetY = this.camera.parent.rotation.y - AUTOPAN_ANGLE;
+    new TWEEN.Tween(this.camera.parent.rotation)
+        .to({ y: targetY }, AUTOPAN_DURATION)
+        .easing(TWEEN.Easing.Quadratic.Out)
+        .start();
+  }
+
   isVRMode() {
     return !!this.vrDisplay && this.vrDisplay.isPresenting;
+  }
+
+  /**
+   * Sets the default yaw.
+   * @param {Number} angleRadian The yaw in radians.
+   */
+  private setDefaultYaw(angleRadian: number) {
+    // Rotate the camera parent to take into account the scene's rotation.
+    // By default, it should be at the center of the image.
+    // const display = this.controls.getVRDisplay();
+
+    console.log(this.vrDisplay);
+
+    // For desktop, we subtract the current display Y axis
+    // const theta = display.theta_ || 0;
+
+    // For devices with orientation we make the current view center
+    // if (display.poseSensor_) {
+    //   display.poseSensor_.resetPose();
+    // }
+
+    // this.camera.parent.rotation.y = (Math.PI / 2.0) + angleRad - theta;
+    this.camera.parent.rotation.y = (Math.PI / 2.0) + angleRadian;
+  }
+
+  private didLoad(event: Object = {}) {
+    this.emit('load', event);
+    if (this.sceneResolve) {
+      this.sceneResolve();
+    }
+  }
+
+  private didError(message: any) {
+    this.emit('error', message);
+    if (this.sceneReject) {
+      this.sceneReject(message);
+    }
   }
 
   private onVRDisplayPresentChange() {

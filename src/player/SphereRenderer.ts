@@ -1,6 +1,5 @@
 import * as THREE from "three";
 import TWEEN from "@tweenjs/tween.js";
-import VideoProxy from "./video-proxy";
 import Util from "../shared/util";
 import { VIDEO_TYPE, EYE } from "../shared/constants";
 

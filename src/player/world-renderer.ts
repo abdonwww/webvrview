@@ -2,11 +2,11 @@ import { EventEmitter } from 'eventemitter3';
 import * as THREE from 'three';
 import TWEEN from '@tweenjs/tween.js';
 import WEBVR from './three.webvr';
-import AdaptivePlayer from './adaptive-player';
+import AdaptivePlayer from './AdaptivePlayer';
 // import HotspotRenderer from './hotspot-renderer';
 import ReticleRenderer from './reticle-renderer';
 import SphereRenderer from './SphereRenderer';
-import VideoProxy from './video-proxy';
+import VideoProxy from './VideoProxy';
 import Util from "../shared/util";
 
 // https://threejs.org/docs/#manual/en/introduction/How-to-create-VR-content

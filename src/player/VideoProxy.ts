@@ -33,8 +33,10 @@ export default class VideoProxy {
       this.audioElement.src = this.videoElement.src;
       this.audioElement.play();
     } else {
-      this.videoElement.play().then(function(e: any) {
+      this.videoElement.play().then((e: any) => {
         console.log('Playing video.', e);
+      }).catch((e: any) => {
+        console.error(e);
       });
     }
   }
