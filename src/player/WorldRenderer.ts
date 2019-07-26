@@ -3,16 +3,18 @@ import * as THREE from "three";
 import TWEEN from "@tweenjs/tween.js";
 import WEBVR from "./three.webvr";
 import AdaptivePlayer from "./AdaptivePlayer";
-// import HotspotRenderer from './hotspot-renderer';
-// import ReticleRenderer from "./reticle-renderer";
+// import HotspotRenderer from './HotspotRenderer';
+// import ReticleRenderer from "./ReticleRenderer";
 import SphereRenderer from "./SphereRenderer";
 import VideoProxy from "./VideoProxy";
 import Util from "../shared/util";
 
+// https://threejsfundamentals.org/threejs/lessons/threejs-webvr.html
 // https://threejs.org/docs/#manual/en/introduction/How-to-create-VR-content
 
 export default class WorldRenderer extends EventEmitter {
   sphereRenderer: SphereRenderer;
+  // hotspotRenderer: HotspotRenderer;
   // reticleRenderer: ReticleRenderer;
   renderer: THREE.WebGLRenderer;
   scene: THREE.Scene;
@@ -156,8 +158,48 @@ export default class WorldRenderer extends EventEmitter {
         .start();
   }
 
+  dispose() {
+    const eyeLeft = this.scene.getObjectByName('eyeLeft');
+    this.disposeEye(eyeLeft);
+    const eyeRight = this.scene.getObjectByName('eyeRight');
+    this.disposeEye(eyeRight);
+  }
+
+  destroy() {
+    if (this.player) {
+      this.player.removeAllListeners();
+      this.player.destroy();
+      this.player = null;
+    }
+    const photo = this.scene.getObjectByName('photo');
+    const eyeLeft = this.scene.getObjectByName('eyeLeft');
+    const eyeRight = this.scene.getObjectByName('eyeRight');
+  
+    if (eyeLeft) {
+      this.disposeEye(eyeLeft);
+      photo.remove(eyeLeft);
+      this.scene.remove(eyeLeft);
+    }
+  
+    if (eyeRight) {
+      this.disposeEye(eyeRight);
+      photo.remove(eyeRight);
+      this.scene.remove(eyeRight);
+    }
+  }
+
   isVRMode() {
     return !!this.vrDisplay && this.vrDisplay.isPresenting;
+  }
+
+  private disposeEye(eye: any) {
+    if (eye) {
+      if (eye.material.map) {
+        eye.material.map.dispose();
+      }
+      eye.material.dispose();
+      eye.geometry.dispose();
+    }
   }
 
   /**
@@ -205,7 +247,6 @@ export default class WorldRenderer extends EventEmitter {
     const isVR = this.isVRMode();
   
     // If the mode changed to VR and there is at least one hotspot, show reticle.
-    // const isReticleVisible = isVR;
     // const isReticleVisible = isVR && this.hotspotRenderer.getCount() > 0;
     // this.reticleRenderer.setVisibility(isReticleVisible);
   

@@ -3,8 +3,8 @@ import * as THREE from 'three';
 import TWEEN from '@tweenjs/tween.js';
 import WEBVR from './three.webvr';
 import AdaptivePlayer from './AdaptivePlayer';
-// import HotspotRenderer from './hotspot-renderer';
-import ReticleRenderer from './reticle-renderer';
+import HotspotRenderer from './HotspotRenderer';
+import ReticleRenderer from './ReticleRenderer';
 import SphereRenderer from './SphereRenderer';
 import VideoProxy from './VideoProxy';
 import Util from "../shared/util";
@@ -38,7 +38,7 @@ const AUTOPAN_ANGLE = 0.4;
 
 export default class WorldRenderer extends EventEmitter {
   sphereRenderer: SphereRenderer;
-  // hotspotRenderer: HotspotRenderer;
+  hotspotRenderer: HotspotRenderer;
   reticleRenderer: ReticleRenderer;
   videoProxy: VideoProxy;
   vrDisplay: any;
@@ -57,12 +57,10 @@ export default class WorldRenderer extends EventEmitter {
     super();
     this.init(params.hideFullscreenButton);
 
-    console.log(this.scene);
-
     this.sphereRenderer = new SphereRenderer(this.scene);
-    // this.hotspotRenderer = new HotspotRenderer(this);
-    // this.hotspotRenderer.on('focus', this.onHotspotFocus.bind(this));
-    // this.hotspotRenderer.on('blur', this.onHotspotBlur.bind(this));
+    this.hotspotRenderer = new HotspotRenderer(this);
+    this.hotspotRenderer.on('focus', this.onHotspotFocus.bind(this));
+    this.hotspotRenderer.on('blur', this.onHotspotBlur.bind(this));
     this.reticleRenderer = new ReticleRenderer(this.camera);
 
     // Get the VR Display as soon as we initialize.
