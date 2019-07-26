@@ -1,5 +1,7 @@
 import { EventEmitter } from "eventemitter3";
 import * as THREE from "three";
+import { DeviceOrientationControls } from 'three/examples/jsm/controls/DeviceOrientationControls.js';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import TWEEN from "@tweenjs/tween.js";
 import WEBVR from "./three.webvr";
 import AdaptivePlayer from "./AdaptivePlayer";
@@ -10,6 +12,7 @@ import VideoProxy from "./VideoProxy";
 import Util from "../shared/util";
 
 // https://threejsfundamentals.org/threejs/lessons/threejs-webvr.html
+// https://qiita.com/kingpanda/items/ffd9633c03f9c8230bfe
 // https://threejs.org/docs/#manual/en/introduction/How-to-create-VR-content
 
 export default class WorldRenderer extends EventEmitter {
@@ -19,6 +22,7 @@ export default class WorldRenderer extends EventEmitter {
   renderer: THREE.WebGLRenderer;
   scene: THREE.Scene;
   camera: THREE.PerspectiveCamera;
+  controls: OrbitControls;
   sphereGroup: THREE.Object3D;
   sceneResolve: Function;
   sceneReject: Function;
@@ -54,6 +58,8 @@ export default class WorldRenderer extends EventEmitter {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.vr.enabled = true; // this changes camera position (x: 0, y: 1.6, z: 0) https://github.com/mrdoob/three.js/issues/14994
 
+    this.controls = new OrbitControls(camera, renderer.domElement);
+
     this.sphereGroup = sphereGroup;
     this.camera = camera;
     this.renderer = renderer;
@@ -81,13 +87,16 @@ export default class WorldRenderer extends EventEmitter {
   }
 
   render() {
+    const userHeight = this.camera.position.y;
+
     if (this.videoProxy) {
       this.videoProxy.update();
     }
 
-    const userHeight = this.camera.position.y;
     this.sphereGroup.position.set(0, userHeight, 0); // this changes camera position (x: 0, y: 1.6, z: 0) https://github.com/mrdoob/three.js/issues/14994
     this.sphereRenderer.render();
+    this.controls.target.set(0, userHeight, 0);
+    this.controls.update();
     this.renderer.render(this.scene, this.camera);
 
     if (this.isVRMode()) {
