@@ -14,6 +14,7 @@ import Util from "../shared/util";
 // https://threejsfundamentals.org/threejs/lessons/threejs-webvr.html
 // https://qiita.com/kingpanda/items/ffd9633c03f9c8230bfe
 // https://threejs.org/docs/#manual/en/introduction/How-to-create-VR-content
+// https://www.pentacreation.com/blog/2018/11/181105.html
 
 export default class WorldRenderer extends EventEmitter {
   sphereRenderer: SphereRenderer;
@@ -43,20 +44,21 @@ export default class WorldRenderer extends EventEmitter {
 
     // Add a camera and camera dummy
     const camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 100);
+    camera.position.x = 0.00000001, // For PC
     camera.layers.enable(1);
     camera.layers.enable(2);
     camera.name = "camera";
 
-    const cameraDummy = new THREE.Object3D();
-    cameraDummy.name = "cameraDummy";
-    cameraDummy.add(camera);
+    // const cameraDummy = new THREE.Object3D();
+    // cameraDummy.name = "cameraDummy";
+    // cameraDummy.add(camera);
 
     // Antialiasing disabled to improve performance.
     const renderer = new THREE.WebGLRenderer({ antialias: false });
     renderer.setClearColor(0x000000, 0);
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.vr.enabled = true; // this changes camera position (x: 0, y: 1.6, z: 0) https://github.com/mrdoob/three.js/issues/14994
+    // renderer.vr.enabled = true; // this changes camera position (x: 0, y: 1.6, z: 0) https://github.com/mrdoob/three.js/issues/14994
 
     this.controls = new OrbitControls(camera, renderer.domElement);
 
@@ -66,7 +68,15 @@ export default class WorldRenderer extends EventEmitter {
 
     this.scene = new THREE.Scene();
     this.scene.add(this.sphereGroup);
-    this.scene.add(this.camera.parent);
+    this.scene.add(this.camera);
+
+    this.controls.target.set(0, this.camera.position.y, 0);
+
+    // this.controls.target.set(
+    //   this.camera.position.x + 0.001,
+    //   this.camera.position.y,
+    //   this.camera.position.z,
+    // );
 
     container.appendChild(renderer.domElement);
     container.appendChild(WEBVR.createButton(renderer));
@@ -79,11 +89,39 @@ export default class WorldRenderer extends EventEmitter {
     // this.reticleRenderer = new ReticleRenderer(this.camera);
 
     // Get the VR Display as soon as we initialize.
-    navigator.getVRDisplays().then((displays) => {
-      if (displays.length > 0) {
-        this.vrDisplay = displays[0];
+    // navigator.getVRDisplays().then((displays) => {
+    //   if (displays.length > 0) {
+    //     this.vrDisplay = displays[0];
+    //   }
+    // });
+
+    // Support both WebVR and WebXR APIs.
+    if (navigator.xr) {
+      navigator.xr.requestDevice().then((device: any) => {
+        if (device) {
+          device.supportsSession({ immersive: true, exclusive: true }).then(() => {
+            this.vrDisplay = device;
+            this.renderer.vr.enabled = true;
+            this.emit('displayconnected', { vrDisplay: this.vrDisplay });
+          });
+        }
+      }).catch((event: any) => {
+        this.emit('displayunconnected', event);
+      });
+    } else {
+      if (navigator.getVRDisplays) {
+        navigator.getVRDisplays().then((displays) => {
+         if (displays.length > 0) {
+           this.vrDisplay = displays[0];
+           this.renderer.vr.enabled = true;
+           this.emit('displayconnected', { vrDisplay: this.vrDisplay });
+         }
+        });
+      } else {
+        this.emit('displaynotfound');
       }
-    });
+    }
+
   }
 
   render() {
@@ -95,7 +133,8 @@ export default class WorldRenderer extends EventEmitter {
 
     this.sphereGroup.position.set(0, userHeight, 0); // this changes camera position (x: 0, y: 1.6, z: 0) https://github.com/mrdoob/three.js/issues/14994
     this.sphereRenderer.render();
-    this.controls.target.set(0, userHeight, 0);
+    // this.controls.target.set(0, userHeight, 0);
+
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
 
@@ -156,16 +195,16 @@ export default class WorldRenderer extends EventEmitter {
     return promise;
   }
 
-  autopan() {
-    const AUTOPAN_DURATION: number = 3000;
-    const AUTOPAN_ANGLE: number = 0.4;
+  // autopan() {
+  //   const AUTOPAN_DURATION: number = 3000;
+  //   const AUTOPAN_ANGLE: number = 0.4;
 
-    const targetY = this.camera.parent.rotation.y - AUTOPAN_ANGLE;
-    new TWEEN.Tween(this.camera.parent.rotation)
-        .to({ y: targetY }, AUTOPAN_DURATION)
-        .easing(TWEEN.Easing.Quadratic.Out)
-        .start();
-  }
+  //   const targetY = this.camera.parent.rotation.y - AUTOPAN_ANGLE;
+  //   new TWEEN.Tween(this.camera.parent.rotation)
+  //       .to({ y: targetY }, AUTOPAN_DURATION)
+  //       .easing(TWEEN.Easing.Quadratic.Out)
+  //       .start();
+  // }
 
   dispose() {
     const eyeLeft = this.scene.getObjectByName('eyeLeft');
@@ -220,8 +259,6 @@ export default class WorldRenderer extends EventEmitter {
     // By default, it should be at the center of the image.
     // const display = this.controls.getVRDisplay();
 
-    console.log(this.vrDisplay);
-
     // For desktop, we subtract the current display Y axis
     // const theta = display.theta_ || 0;
 
@@ -231,7 +268,8 @@ export default class WorldRenderer extends EventEmitter {
     // }
 
     // this.camera.parent.rotation.y = (Math.PI / 2.0) + angleRad - theta;
-    this.camera.parent.rotation.y = (Math.PI / 2.0) + angleRadian;
+    // this.camera.parent.rotation.y = (Math.PI / 2.0) + angleRadian;
+    this.camera.rotation.y = (Math.PI / 2.0) + angleRadian;
   }
 
   private didLoad(event: Object = {}) {

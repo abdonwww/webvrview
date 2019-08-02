@@ -59,9 +59,9 @@ function onRenderLoad(event: any) {
   // Hide loading indicator.
   // loadIndicator.hide();
   // Autopan only on desktop, for photos only, and only if autopan is enabled.
-  if (!Util.isMobile() && !worldRenderer.sceneInfo.video && !worldRenderer.sceneInfo.isAutopanOff) {
-    worldRenderer.autopan();
-  }
+  // if (!Util.isMobile() && !worldRenderer.sceneInfo.video && !worldRenderer.sceneInfo.isAutopanOff) {
+  //   worldRenderer.autopan();
+  // }
   // Notify the API that we are ready, but only do this once.
   if (!isReadySent) {
     if (event.videoElement) {
