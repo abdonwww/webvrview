@@ -18,13 +18,24 @@ const showStats = () => {
 showStats();
 
 const worldRenderer = new WorldRenderer();
-worldRenderer.on('load', onRenderLoad);
-worldRenderer.on('error', onRenderError);
+worldRenderer.on('sceneload', onSceneLoad);
+worldRenderer.on('sceneerror', onSceneError);
 worldRenderer.on('modechange', onModeChange);
 // worldRenderer.on('play', onPlay);
 // worldRenderer.on('ended', onEnded);
 
-worldRenderer.setScene({});
+const sceneInfo = {
+  isStereo: false,
+  loop: true,
+  volume: 1, // 0 - 1
+  muted: false, // autoplay throw DOMExeption if muted property is false
+  // image: "/assets/gallery/taj-mahal.jpg",
+  video: '/assets/dash/richoh1_0.mpd',
+};
+
+// "/assets/video/congo_2048.mp4"
+
+worldRenderer.setScene(sceneInfo);
 worldRenderer.renderer.setAnimationLoop((time: number) => {
   // console.log("position", worldRenderer.camera.position);
   stats.begin();
@@ -38,30 +49,32 @@ let isReadySent = false;
 /**
  * World Events
  */
-function onRenderLoad(event: any) {
+function onSceneLoad(event: any) {
   if (event.videoElement) {
     // const scene = SceneInfo.loadFromGetParams();
-    // On mobile, tell the user they need to tap to start. Otherwise, autoplay.
-    if (Util.isMobile()) {
-      // Tell user to tap to start.
-      // showPlayButton();
-      // document.body.addEventListener('touchend', onVideoTap);
-    } else {
-      event.videoElement.play();
-    }
-    
+
     // Attach to pause and play events, to notify the API.
     event.videoElement.addEventListener('play', onPlay);
     event.videoElement.addEventListener('pause', onPause);
     event.videoElement.addEventListener('timeupdate', onGetCurrentTime);
     event.videoElement.addEventListener('ended', onEnded);
+
+    // On mobile, tell the user they need to tap to start. Otherwise, autoplay.
+    // if (Util.isMobile()) {
+    //   // Tell user to tap to start.
+    //   showPlayButton();
+    //   document.body.addEventListener('touchend', onVideoTap);
+    // } else {
+    //   event.videoElement.play();
+    // }
+
+    showPlayButton();
+    document.body.addEventListener('touchend', onVideoTap);
+    document.body.addEventListener('click', onVideoTap);
   }
   // Hide loading indicator.
   // loadIndicator.hide();
-  // Autopan only on desktop, for photos only, and only if autopan is enabled.
-  // if (!Util.isMobile() && !worldRenderer.sceneInfo.video && !worldRenderer.sceneInfo.isAutopanOff) {
-  //   worldRenderer.autopan();
-  // }
+
   // Notify the API that we are ready, but only do this once.
   if (!isReadySent) {
     if (event.videoElement) {
@@ -80,8 +93,8 @@ function onRenderLoad(event: any) {
   }
 }
 
-function onRenderError(message: string) {
-  showError('Render: ' + message);
+function onSceneError(message: string) {
+  showError('Scene: ' + message);
 }
 
 function onModeChange(mode: Object) {
@@ -125,6 +138,27 @@ function onEnded() {
   });
 }
 
+/**
+ * Play Button
+ */
+function onVideoTap() {
+  worldRenderer.videoProxy.play();
+  hidePlayButton();
+
+  // Prevent multiple play() calls on the video element.
+  document.body.removeEventListener('touchend', onVideoTap);
+  document.body.removeEventListener('click', onVideoTap);
+}
+
+function showPlayButton() {
+  const playButton = document.querySelector('#play-overlay');
+  playButton.classList.add('visible');
+}
+
+function hidePlayButton() {
+  const playButton = document.querySelector('#play-overlay');
+  playButton.classList.remove('visible');
+}
 
 /**
  * Common

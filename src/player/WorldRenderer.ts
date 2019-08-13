@@ -2,7 +2,6 @@ import { EventEmitter } from "eventemitter3";
 import * as THREE from "three";
 import { DeviceOrientationControls } from 'three/examples/jsm/controls/DeviceOrientationControls.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import TWEEN from "@tweenjs/tween.js";
 import WEBVR from "./three.webvr";
 import AdaptivePlayer from "./AdaptivePlayer";
 // import HotspotRenderer from './HotspotRenderer';
@@ -44,14 +43,10 @@ export default class WorldRenderer extends EventEmitter {
 
     // Add a camera and camera dummy
     const camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 100);
-    camera.position.x = 0.00000001, // For PC
+    camera.position.z = -0.00000001, // For PC
     camera.layers.enable(1);
     camera.layers.enable(2);
     camera.name = "camera";
-
-    // const cameraDummy = new THREE.Object3D();
-    // cameraDummy.name = "cameraDummy";
-    // cameraDummy.add(camera);
 
     // Antialiasing disabled to improve performance.
     const renderer = new THREE.WebGLRenderer({ antialias: false });
@@ -89,12 +84,6 @@ export default class WorldRenderer extends EventEmitter {
     // this.reticleRenderer = new ReticleRenderer(this.camera);
 
     // Get the VR Display as soon as we initialize.
-    // navigator.getVRDisplays().then((displays) => {
-    //   if (displays.length > 0) {
-    //     this.vrDisplay = displays[0];
-    //   }
-    // });
-
     // Support both WebVR and WebXR APIs.
     if (navigator.xr) {
       navigator.xr.requestDevice().then((device: any) => {
@@ -146,65 +135,49 @@ export default class WorldRenderer extends EventEmitter {
   /**
    * @return {Promise} When the scene is fully loaded.
    */
-  setScene(scene: any): Promise<Object> {
+  setScene(sceneInfo: any): Promise<Object> {
     const promise = new Promise((resolve, reject) => {
       this.sceneResolve = resolve;
       this.sceneReject = reject;
     });
 
-    this.sceneInfo = scene;
-
-    // const params = {
-    //   isStereo: scene.isStereo,
-    //   loop: scene.loop,
-    //   volume: scene.volume,
-    //   muted: scene.muted
-    // };
+    this.sceneInfo = sceneInfo;
 
     const params = {
-      isStereo: false,
-      loop: true,
-      volume: 1, // 0 - 1
-      muted: true, // autoplay throw DOMExeption if muted property is false
+      isStereo: sceneInfo.isStereo,
+      loop: sceneInfo.loop,
+      volume: sceneInfo.volume,
+      muted: sceneInfo.muted,
     };
 
-    this.setDefaultYaw(scene.defaultYaw || 0);
+    this.setDefaultYaw(sceneInfo.defaultYaw || 0);
 
-    // this.sphereRenderer.setPhotosphere("/assets/gallery/taj-mahal.jpg", params).then(() => {
-    //   this.didLoad();
-    // }).catch((error: any) => {
-    //   this.didError(error);
-    // });
-
-    this.player = new AdaptivePlayer(params);
-    this.player.on('load', (videoElement: any, videoType: number) => {
-      this.sphereRenderer.setVideosphere(videoElement, videoType, params).then(() => {
-        this.didLoad({ videoElement: videoElement });
-        this.videoProxy.play(); // Test
+    if (sceneInfo.image && !sceneInfo.video) {
+      this.sphereRenderer.setPhotosphere(sceneInfo.image, params).then(() => {
+        this.sceneDidLoad();
       }).catch((error: any) => {
-        this.didError(error);
+        this.sceneDidError(error);
       });
-    });
-    // this.player.on('error', (error: any) => {});
-    this.player.load("/assets/dash/richoh1_0.mpd");
-    // this.player.load("/assets/video/congo_2048.mp4");
-    // this.player.load(scene.video);
-  
-    this.videoProxy = new VideoProxy(this.player.video);
+    } else if (sceneInfo.video) {
+      this.player = new AdaptivePlayer(params);
+      this.player.on('load', (videoElement: any, videoType: number) => {
+        this.sphereRenderer.setVideosphere(videoElement, videoType, params).then(() => {
+          this.sceneDidLoad({ videoElement: videoElement });
+          // this.videoProxy.play(); // Autoplay Test
+        }).catch((error: any) => {
+          this.sceneDidError(error);
+        });
+      });
+      this.player.on('error', (error: any) => {
+        this.sceneDidError('Video load error: ' + error);
+      });
+      this.player.load(sceneInfo.video);
+    
+      this.videoProxy = new VideoProxy(this.player.video);
+    }
 
     return promise;
   }
-
-  // autopan() {
-  //   const AUTOPAN_DURATION: number = 3000;
-  //   const AUTOPAN_ANGLE: number = 0.4;
-
-  //   const targetY = this.camera.parent.rotation.y - AUTOPAN_ANGLE;
-  //   new TWEEN.Tween(this.camera.parent.rotation)
-  //       .to({ y: targetY }, AUTOPAN_DURATION)
-  //       .easing(TWEEN.Easing.Quadratic.Out)
-  //       .start();
-  // }
 
   dispose() {
     const eyeLeft = this.scene.getObjectByName('eyeLeft');
@@ -272,15 +245,15 @@ export default class WorldRenderer extends EventEmitter {
     this.camera.rotation.y = (Math.PI / 2.0) + angleRadian;
   }
 
-  private didLoad(event: Object = {}) {
-    this.emit('load', event);
+  private sceneDidLoad(event: Object = {}) {
+    this.emit('sceneload', event);
     if (this.sceneResolve) {
       this.sceneResolve();
     }
   }
 
-  private didError(message: any) {
-    this.emit('error', message);
+  private sceneDidError(message: any) {
+    this.emit('sceneerror', message);
     if (this.sceneReject) {
       this.sceneReject(message);
     }
