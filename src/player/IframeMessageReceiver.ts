@@ -29,9 +29,9 @@ export default class IFrameMessageReceiver extends EventEmitter {
       console.log('onMessage_', event);
     }
   
-    var message = event.data;
-    var type = message.type.toLowerCase();
-    var data = message.data;
+    const message = event.data;
+    const type = message.type.toLowerCase();
+    const data = message.data;
   
     switch (type) {
       case MESSAGE.SET_CONTENT:

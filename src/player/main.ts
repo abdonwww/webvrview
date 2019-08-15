@@ -1,7 +1,9 @@
 import WebVRPolyfill from 'webvr-polyfill';
 import Stats from "stats.js";
 import TWEEN from "@tweenjs/tween.js";
+import { MESSAGE } from "../shared/constants";
 import Util from "../shared/util";
+import IFrameMessageReceiver from "./IFrameMessageReceiver";
 import SceneInfo from "./SceneInfo";
 import WorldRenderer from "./WorldRenderer";
 
@@ -17,6 +19,17 @@ const showStats = () => {
   document.body.appendChild(stats.dom);
 };
 showStats();
+
+
+const receiver = new IFrameMessageReceiver();
+receiver.on(MESSAGE.PLAY, onPlayRequest);
+receiver.on(MESSAGE.PAUSE, onPauseRequest);
+receiver.on(MESSAGE.SET_CONTENT, onSetContent);
+receiver.on(MESSAGE.SET_VOLUME, onSetVolume);
+receiver.on(MESSAGE.MUTED, onMuted);
+receiver.on(MESSAGE.SET_CURRENT_TIME, onUpdateCurrentTime);
+receiver.on(MESSAGE.GET_POSITION, onGetPosition);
+receiver.on(MESSAGE.SET_FULLSCREEN, onSetFullscreen);
 
 const sceneInfo = SceneInfo.loadFromGetParams();
 const worldRenderer = new WorldRenderer();
@@ -36,6 +49,112 @@ worldRenderer.renderer.setAnimationLoop((time: number) => {
 });
 
 let isReadySent = false;
+
+
+/**
+ * IFrameMessageReceiver
+ */
+function onApiError(message: string) {
+  console.error(message);
+  Util.sendParentMessage({
+    type: 'error',
+    data: {
+      message: message
+    }
+  });
+}
+
+function onPlayRequest() {
+  if (!worldRenderer.videoProxy) {
+    onApiError('Attempt to pause, but no video found.');
+    return;
+  }
+  worldRenderer.videoProxy.play();
+}
+
+function onPauseRequest() {
+  if (!worldRenderer.videoProxy) {
+    onApiError('Attempt to pause, but no video found.');
+    return;
+  }
+  worldRenderer.videoProxy.pause();
+}
+
+function onSetContent(e: any) {
+  if (Util.isDebug()) {
+    console.log('onSetContent', e);
+  }
+
+  // Fade to black.
+  worldRenderer.sphereRenderer.setOpacity(0, 500).then(function() {
+    // Then load the new scene.
+    var scene = SceneInfo.loadFromAPIParams(e.contentInfo);
+    worldRenderer.destroy();
+    // Update the URL to reflect the new scene. This is important particularily
+    // on iOS where we use a fake fullscreen mode.
+    var url = scene.getCurrentUrl();
+    //console.log('Updating url to be %s', url);
+    window.history.pushState(null, 'VR View', url);
+    // And set the new scene.
+    return worldRenderer.setScene(scene);
+  }).then(function() {
+    // Then fade the scene back in.
+    worldRenderer.sphereRenderer.setOpacity(1, 500);
+  });
+}
+
+function onSetVolume(e: any) {
+  // Only work for video. If there's no video, send back an error.
+  if (!worldRenderer.videoProxy) {
+    onApiError('Attempt to set volume, but no video found.');
+    return;
+  }
+  worldRenderer.videoProxy.setVolume(e.volumeLevel);
+  Util.sendParentMessage({
+    type: 'volumechange',
+    data: e.volumeLevel
+  });
+}
+
+function onMuted(e: any) {
+  // Only work for video. If there's no video, send back an error.
+  if (!worldRenderer.videoProxy) {
+    onApiError('Attempt to mute, but no video found.');
+    return;
+  }
+  worldRenderer.videoProxy.mute(e.muteState);
+  Util.sendParentMessage({
+    type: 'muted',
+    data: e.muteState
+  });
+}
+
+function onUpdateCurrentTime(time: number) {
+  if (!worldRenderer.videoProxy) {
+    onApiError('Attempt to pause, but no video found.');
+    return;
+  }
+  worldRenderer.videoProxy.setCurrentTime(time);
+  onGetCurrentTime();
+}
+
+function onGetPosition() {
+  Util.sendParentMessage({
+    type: 'getposition',
+    data: {
+      Yaw: worldRenderer.camera.rotation.y * 180 / Math.PI,
+      Pitch: worldRenderer.camera.rotation.x * 180 / Math.PI
+    }
+  });
+}
+
+function onSetFullscreen() {
+  if (!worldRenderer.videoProxy) {
+    onApiError('Attempt to set fullscreen, but no video found.');
+    return;
+  }
+  // worldRenderer.manager.onFSClick_();
+}
 
 /**
  * World Events

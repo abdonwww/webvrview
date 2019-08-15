@@ -97,18 +97,18 @@ export default class WorldRenderer extends EventEmitter {
       }).catch((event: any) => {
         this.emit('displayunconnected', event);
       });
+    } else if (navigator.getVRDisplays) {
+      navigator.getVRDisplays().then((displays) => {
+        if (displays.length > 0) {
+          this.vrDisplay = displays[0];
+          this.renderer.vr.enabled = true;
+          this.emit('displayconnected', { vrDisplay: this.vrDisplay });
+        }
+      }).catch((event: any) => {
+        this.emit('displayunconnected', event);
+      });
     } else {
-      if (navigator.getVRDisplays) {
-        navigator.getVRDisplays().then((displays) => {
-         if (displays.length > 0) {
-           this.vrDisplay = displays[0];
-           this.renderer.vr.enabled = true;
-           this.emit('displayconnected', { vrDisplay: this.vrDisplay });
-         }
-        });
-      } else {
-        this.emit('displaynotfound');
-      }
+      this.emit('displaynotfound');
     }
 
   }

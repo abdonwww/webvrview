@@ -88,21 +88,22 @@ export default class SphereRenderer {
    *
    * @return {Promise} When the opacity change is complete.
    */
-  // setOpacity(opacity: number, duration: number) {
-  //   const scene = this.scene;
-  //   // If we want the opacity
-  //   const overlayOpacity = 1 - opacity;
-  //   return new Promise((resolve: any) => {
-  //     const mask = scene.getObjectByName("opacityMask");
-  //     const tween = new TWEEN.Tween({ opacity: mask.material.opacity })
-  //       .to({ opacity: overlayOpacity }, duration)
-  //       .easing(TWEEN.Easing.Quadratic.InOut);
-  //     tween.onUpdate(function() {
-  //       mask.material.opacity = this.opacity;
-  //     });
-  //     tween.onComplete(resolve).start();
-  //   });
-  // }
+  setOpacity(opacity: number, duration: number) {
+    const scene = this.scene;
+    // If we want the opacity
+    const overlayOpacity = 1 - opacity;
+    return new Promise((resolve: any) => {
+      const mask = scene.getObjectByName("mask") as THREE.Mesh;
+      const material = (mask.material instanceof THREE.Material) ? mask.material : mask.material[0];
+      const tween = new TWEEN.Tween({ opacity: material.opacity })
+        .to({ opacity: overlayOpacity }, duration)
+        .easing(TWEEN.Easing.Quadratic.InOut);
+      tween.onUpdate(function() {
+        material.opacity = this.opacity;
+      });
+      tween.onComplete(resolve).start();
+    });
+  }
 
   /**
    * OpacityMask: Sphere for fading in and out
