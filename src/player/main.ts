@@ -2,6 +2,7 @@ import WebVRPolyfill from 'webvr-polyfill';
 import Stats from "stats.js";
 import TWEEN from "@tweenjs/tween.js";
 import Util from "../shared/util";
+import SceneInfo from "./SceneInfo";
 import WorldRenderer from "./WorldRenderer";
 
 new WebVRPolyfill();
@@ -17,24 +18,14 @@ const showStats = () => {
 };
 showStats();
 
+const sceneInfo = SceneInfo.loadFromGetParams();
 const worldRenderer = new WorldRenderer();
 worldRenderer.on('sceneload', onSceneLoad);
 worldRenderer.on('sceneerror', onSceneError);
 worldRenderer.on('modechange', onModeChange);
-// worldRenderer.on('play', onPlay);
-// worldRenderer.on('ended', onEnded);
-
-const sceneInfo = {
-  isStereo: false,
-  loop: true,
-  volume: 1, // 0 - 1
-  muted: false, // autoplay throw DOMExeption if muted property is false
-  // image: "/assets/gallery/taj-mahal.jpg",
-  video: '/assets/dash/richoh1_0.mpd',
-};
-
-// "/assets/video/congo_2048.mp4"
-
+worldRenderer.on('displayconnected', () => {});
+worldRenderer.on('displayunconnected', () => {});
+worldRenderer.on('displaynotfound', () => {});
 worldRenderer.setScene(sceneInfo);
 worldRenderer.renderer.setAnimationLoop((time: number) => {
   // console.log("position", worldRenderer.camera.position);

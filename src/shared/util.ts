@@ -185,7 +185,7 @@ export default class Util {
     }
   }
   
-  static parseBoolean(value: string | number) {
+  static parseBoolean(value: boolean | string | number) {
     if (value == 'false' || value == 0) {
       return false;
     } else if (value == 'true' || value == 1) {
@@ -194,6 +194,10 @@ export default class Util {
       return !!value;
     }
   }
+
+  static snakeToCamel(text: string){
+    return text.replace(/_./g, (s) => s.charAt(1).toUpperCase());
+  };
 
   /**
   * @param base {String} An absolute directory root.
