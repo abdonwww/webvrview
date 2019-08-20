@@ -91,6 +91,12 @@ export default class WorldRenderer extends EventEmitter {
           device.supportsSession({ immersive: true, exclusive: true }).then(() => {
             this.vrDisplay = device;
             this.renderer.vr.enabled = true;
+
+            // this changes camera position (x: 0, y: 1.6, z: 0) https://github.com/mrdoob/three.js/issues/14994
+            // const userHeight = this.camera.position.y;
+            // this.controls.target.set(0, userHeight, 0);
+            // this.sphereGroup.position.set(0, userHeight, 0);
+            console.log('xr', this.camera.position);
             this.emit('displayconnected', { vrDisplay: this.vrDisplay });
           });
         }
@@ -102,6 +108,12 @@ export default class WorldRenderer extends EventEmitter {
         if (displays.length > 0) {
           this.vrDisplay = displays[0];
           this.renderer.vr.enabled = true;
+
+          // this changes camera position (x: 0, y: 1.6, z: 0) https://github.com/mrdoob/three.js/issues/14994
+          // const userHeight = this.camera.position.y;
+          // this.controls.target.set(0, userHeight, 0);
+          // this.sphereGroup.position.set(0, userHeight, 0);
+          console.log('xr', this.camera.position);
           this.emit('displayconnected', { vrDisplay: this.vrDisplay });
         }
       }).catch((event: any) => {
