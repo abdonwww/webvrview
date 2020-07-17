@@ -36,7 +36,7 @@
   "dependencies": {
     "@tweenjs/tween.js": "^17.4.0",
     "eventemitter3": "^3.1.2",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "shaka-player": "^2.5.2",
     "stats.js": "^0.17.0",
     "three": "^0.105.2",
