@@ -40,7 +40,7 @@
     "shaka-player": "^2.5.2",
     "stats.js": "^0.17.0",
     "three": "^0.105.2",
-    "urijs": "^1.19.1",
+    "urijs": "^1.19.4",
     "webvr-boilerplate": "^0.5.0"
   }
 }
